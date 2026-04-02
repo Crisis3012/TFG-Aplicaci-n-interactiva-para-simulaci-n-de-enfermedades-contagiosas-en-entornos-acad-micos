@@ -1,0 +1,36 @@
+UI Imporvements:
+    - Make max zoom out equal to half as much needed to keep all scene in view
+
+Log.txt:
+    - Cuando la aplicación se cierre debe generar primero un log.txt en el que se almacenarán datos de carga útiles para la siguiente ejecución
+    - Entre estos datos se listan los siguientes:
+        - Última facultad cargada (para cargarla de manera default)
+        - Ajustes seleccionados (para cargar los ajustes preferidos por el usuario)
+
+Ajustes de la aplicación:
+    - Cambiar entre el uso de la aplicación en ventana o pantalla completa
+    - Habilitar autoguardado durante la construcción
+    - Seleccionar tiempo entre autoguardados
+    - Alternar entre diferentes temas de colores*
+    - Eliminar todas las facultades del dispositivo a la vez
+
+Al entrar a la aplicación:
+    - UI:
+        - Arriba a la derecha debe aparecer un menu desplegable que te muestre em primera instancia que facultad está cargada y que al desplegarlo te de la opción de seleccionar otras facultades o crear una nueva
+        - Fondo de imagen fija con botones que se ajustan a la altura de la ventana
+
+Cargar facultades a memoria:
+    - Primero se crea un nodo Pasillo que hace de vinculo
+    - Se guardan en grafos creados a partir de los csv
+    - Se necesitan mínimo 2 columnas:
+        - Nombre
+        - Grupo
+    - Cada linea es un nodo
+    - Hay 3 Tipos de nodos:
+        - Pasillo: Nodo central del grafo que conecta todos los grpos y clases sueltas
+        - Grupo: Nodo que agrupa todas las clases dentro de él, sirve para mejores visualizaciones y análisis
+        - Espacios: Nodo básico, cada linea del csv se convertirá en uno de estos
+    - Primero se mira el grupo:
+        - Si no hay: Se crea el nodo con los datos de la fila y se conecta a "Pasillo"
+        - Si hay y no existe: Se crea un nodo grupo que se conecta a "Pasillo" y el nodo de la linea se conecta al grupo creados
+        - Si hay y existe: Se crea el nodo con los datos de la fila y se conecta al grupo existente

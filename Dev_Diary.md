@@ -1,0 +1,2 @@
+- Versión 0.0.1:
+    Primera versión preeliminar con pequeños sistemas de UI, una ventana funcional e interactividad mínima. En esta versión se ha empezado a aprender a usar las funciones básicas de la librería Qt de Python.
