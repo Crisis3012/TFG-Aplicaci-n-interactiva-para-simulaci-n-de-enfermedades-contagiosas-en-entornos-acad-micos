@@ -61,11 +61,11 @@ class GraphView(QGraphicsView):
         self.max_zoom = 4.0
 
     def mousePressEvent(self, event):
-        if event.button() == Qt.MouseButton.LeftButton:
-            item = self.itemAt(event.position().toPoint())
+        if event.button() == Qt.MouseButton.MiddleButton:
+            # item = self.itemAt(event.position().toPoint())
 
-            # Solo hacemos pan si se pulsa el fondo, no un nodo
-            if item is None:
+            # # Solo hacemos pan si se pulsa el fondo, no un nodo
+            # if item is None:
                 self._panning = True
                 self._last_mouse_pos = event.position().toPoint()
                 self.setCursor(Qt.CursorShape.ClosedHandCursor)
@@ -92,7 +92,7 @@ class GraphView(QGraphicsView):
         super().mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event):
-        if event.button() == Qt.MouseButton.LeftButton and self._panning:
+        if event.button() == Qt.MouseButton.MiddleButton and self._panning:
             self._panning = False
             self.setCursor(Qt.CursorShape.ArrowCursor)
             event.accept()

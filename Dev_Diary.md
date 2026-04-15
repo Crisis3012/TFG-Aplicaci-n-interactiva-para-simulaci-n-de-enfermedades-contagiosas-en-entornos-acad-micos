@@ -6,3 +6,6 @@
 
 - Versión 0.0.3:
     Se han incorporado las funciones de movimiento, renombramiento y eliminación de nodos y se ha creado una interfaz por consola que permite comprobar el correcto funcionamiento de todas las funciones de backend añadidas hasta el momento. También se ha termiando de añadir las funciones de backend bases previstas y se deja preparado el entorno para empezar a ligar las llamadas de la UI con la API del backend. Nota: después de la adición de las últimas funciones por el momento, parece necesario un reordenamiento de la estructura de la clase Facultad (API), con el objetivo de que en un futuro sea más fácil encontrar las funciones creadas en caso de que necesiten cambios o actualizaciones
+
+- Versión 0.04:
+    Cambio mínimo en el funcionamiento de la UI actual. Ahora la camara de la visión de la facultad se mueve usando el botón central del ratón en vez del izquierdo para evitar errores al clickar sobre objetos movibles.
