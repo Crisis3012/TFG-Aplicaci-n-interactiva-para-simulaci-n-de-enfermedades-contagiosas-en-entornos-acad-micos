@@ -9,3 +9,6 @@
 
 - Versión 0.04:
     Cambio mínimo en el funcionamiento de la UI actual. Ahora la camara de la visión de la facultad se mueve usando el botón central del ratón en vez del izquierdo para evitar errores al clickar sobre objetos movibles.
+
+- Versión 0.0.5:
+    Se han realizado grandes cambios al codigo. Primero de todo se ha formalizado la estructura de los módulos por carpetas con el objetivo de organizar mejor las llamadas, dependencias y estructura general de los archivos de la aplicación. Se ha escrito una documentación detallada sobre las funciones actuales de la aplicación. Se ha creado todo el apartado de frontend inicial de la aplicación y se a conectado al backend a través de una clase controladora que hace de contacto entre los eventos del frontend y las llamadas al backend. Ya se tiene una primera versión semifuncional del Builder a la que le hace falta mucho debugging, adición de funciones y pulimiento de la interfaz.

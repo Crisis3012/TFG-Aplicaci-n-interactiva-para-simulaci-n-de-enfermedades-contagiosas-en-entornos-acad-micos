@@ -73,6 +73,7 @@ class Faculty:
     def __init__(self) -> None:
         self.nodes: Dict[str, Node] = {}
         self.warnings: List[str] = []
+        self.selected_node = None
 
         self.root_uuid = self._generate_uuid()
 
@@ -185,8 +186,8 @@ class Faculty:
         self._attach_child(parent_uuid, space.uuid)
         return space
 
-    def get_root(self) -> Group:
-        return self._get_group(self.root_uuid)
+    def get_root(self) -> Root:
+        return self._get_node(self.root_uuid)
 
     def get_children(self, node_uuid: str) -> List[Node]:
         node = self._get_node(node_uuid)
@@ -239,6 +240,8 @@ class Faculty:
         if isinstance(node, Group):
             node.children_uuids.clear()
 
+        self.selected_node = None
+
         # Eliminar nodo
         del self.nodes[node_uuid]
     
@@ -290,14 +293,6 @@ class Faculty:
         new_parent_container.children_uuids.append(node_uuid)
 
         node.parent_uuid = new_parent_uuid
-
-    def toggle_group_expanded(self, group_uuid: str) -> None:
-        node = self._get_node(group_uuid)
-
-        if not isinstance(node, Group):
-            raise ValueError("Solo los grupos pueden expandirse o contraerse.")
-
-        node.expanded = not node.expanded
     
     def get_valid_parents(self, node_uuid: str) -> list[Node]:
         """
@@ -410,6 +405,11 @@ class Faculty:
             raise ValueError("Solo los grupos pueden expandirse o contraerse.")
 
         node.expanded = not node.expanded
+    
+    def select_node(self, node_uuid: str) -> None:
+        node = self._get_node(node_uuid)
+
+        self.selected_node = node
 
     # -------------------------
     # Carga desde CSV
@@ -670,7 +670,7 @@ class Faculty:
                 else:
                     print(f"{prefix}  - [MISSING] Nodo inexistente ({child_uuid})")
     
-    def select_node(self) -> Node:
+    def debug_select_node(self) -> Node:
         seleccion = list(self.nodes.keys())
         print("\nSelecciona uno de los nodos del grafo")
         for x, i in enumerate(seleccion):
@@ -686,17 +686,8 @@ if __name__ == "__main__":
 
     faculty.print_tree()
 
-    escogido = faculty.select_node()
-
-    # print("\nWarnings:")
-    # for warning in faculty.warnings:
-    #     print("-", warning)
-
-    if escogido is not None:
-        print(faculty.nodes[escogido])
-
-    faculty.move_node("11111111-1111-4111-8111-111111111111", escogido)
-
-    faculty.print_tree()
+    print("\nWarnings:")
+    for warning in faculty.warnings:
+        print("-", warning)
 
     faculty.save_to_csv("proba.csv")
