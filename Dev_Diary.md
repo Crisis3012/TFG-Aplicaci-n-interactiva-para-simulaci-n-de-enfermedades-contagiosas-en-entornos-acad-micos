@@ -12,3 +12,6 @@
 
 - Versión 0.0.5:
     Se han realizado grandes cambios al codigo. Primero de todo se ha formalizado la estructura de los módulos por carpetas con el objetivo de organizar mejor las llamadas, dependencias y estructura general de los archivos de la aplicación. Se ha escrito una documentación detallada sobre las funciones actuales de la aplicación. Se ha creado todo el apartado de frontend inicial de la aplicación y se a conectado al backend a través de una clase controladora que hace de contacto entre los eventos del frontend y las llamadas al backend. Ya se tiene una primera versión semifuncional del Builder a la que le hace falta mucho debugging, adición de funciones y pulimiento de la interfaz.
+
+- Versión 0.0.6:
+    Se ha mejorado la UI haciendo que los nodos se vean con las formas correctas, que sus posiciones no se reinicien cada vez que se redibuja el grafo al hacer una acción (expandir/contraer un grupo, eliminar un nodo, crear un nodo, etc.) y se ha cambiado la eliminación de nodos para que sus posiciones no se queden guardadas en memoria y la vayan sobrecargando de información que ya no es útil

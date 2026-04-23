@@ -75,16 +75,19 @@ class BuilderController:
         """
         Convierte el estado del backend en datos simples para el frontend.
 
-        El GraphView no debería depender directamente de las clases internas
-        del backend. Por eso le pasamos una estructura con nodos y aristas.
+        En vez de depender de get_children(), las aristas se construyen
+        leyendo el parent_uuid de cada nodo visible.
+        Eso es más robusto para la visualización del grafo.
         """
-        visible_nodes = self.faculty.get_visible_nodes()
         root = self.faculty.get_root()
+        visible_nodes = self.faculty.get_visible_nodes()
 
-        if root not in visible_nodes:
-            visible_nodes = [root] + visible_nodes
+        # Aseguramos que root siempre esté incluida
+        visible_by_uuid = {node.uuid: node for node in visible_nodes}
+        visible_by_uuid[root.uuid] = root
 
-        visible_uuids = {node.uuid for node in visible_nodes}
+        visible_nodes = list(visible_by_uuid.values())
+        visible_uuids = set(visible_by_uuid.keys())
 
         nodes = []
         edges = []
@@ -99,12 +102,35 @@ class BuilderController:
                 "size": getattr(node, "size", 100),
             })
 
-            for child in self.faculty.get_children(node.uuid):
-                if child.uuid in visible_uuids:
-                    edges.append({
-                        "source": node.uuid,
-                        "target": child.uuid,
-                    })
+        # Construimos edges leyendo parent_uuid
+        for node in visible_nodes:
+            if node.uuid == root.uuid:
+                continue
+
+            parent_uuid = getattr(node, "parent_uuid", None)
+
+            # Si no tiene padre explícito, lo conectamos a root
+            if parent_uuid is None:
+                parent_uuid = root.uuid
+
+            # Solo dibujamos la arista si el padre también es visible
+            if parent_uuid in visible_uuids:
+                edges.append({
+                    "source": parent_uuid,
+                    "target": node.uuid,
+                })
+
+        print("NODES:")
+        for n in nodes:
+            print(n)
+
+        print("EDGES:")
+        for e in edges:
+            print(e)
+
+        print("PARENTS:")
+        for node in visible_nodes:
+            print(node.name, node.uuid, getattr(node, "parent_uuid", None))
 
         return {
             "nodes": nodes,
@@ -152,6 +178,8 @@ class BuilderController:
             parent_uuid=parent_uuid,
             node_uuid=node_uuid,
         )
+
+        self.faculty.set_group_expanded(group.uuid, True)
 
         if select_after_create:
             self.selected_node_uuid = group.uuid
@@ -259,10 +287,15 @@ class BuilderController:
             return
 
         node_uuid = self.selected_node_uuid
+        deleted_uuids = self._collect_subtree_uuids(node_uuid)
+
         self.selected_node_uuid = None
 
         self.faculty.delete_node(node_uuid)
         self.refresh_all()
+
+        if self.ui is not None and hasattr(self.ui, "forget_graph_nodes"):
+            self.ui.forget_graph_nodes(deleted_uuids)
 
     def delete_node(self, node_uuid: str) -> None:
         node = self.faculty.find_node(node_uuid)
@@ -275,11 +308,16 @@ class BuilderController:
             self._show_error("No se puede eliminar la raíz de la facultad.")
             return
 
+        deleted_uuids = self._collect_subtree_uuids(node_uuid)
+
         if self.selected_node_uuid == node_uuid:
             self.selected_node_uuid = None
 
         self.faculty.delete_node(node_uuid)
         self.refresh_all()
+
+        if self.ui is not None and hasattr(self.ui, "forget_graph_nodes"):
+            self.ui.forget_graph_nodes(deleted_uuids)
 
     def move_selected_node(self, new_parent_uuid: str) -> None:
         if self.selected_node_uuid is None:
@@ -451,3 +489,15 @@ class BuilderController:
             self.ui.show_error(message)
         else:
             print(f"[BuilderController error] {message}")
+
+    def _collect_subtree_uuids(self, node_uuid: str) -> list[str]:
+        """
+        Devuelve el uuid del nodo y de todos sus descendientes.
+        Sirve para limpiar la caché visual del grafo al borrar nodos.
+        """
+        uuids = [node_uuid]
+
+        for child in self.faculty.get_children(node_uuid):
+            uuids.extend(self._collect_subtree_uuids(child.uuid))
+
+        return uuids

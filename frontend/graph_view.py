@@ -62,6 +62,7 @@ class GraphView(QGraphicsView):
         self.scene_obj.setSceneRect(-5000, -5000, 10000, 10000)
 
         self.nodes_by_uuid = {}
+        self.node_positions = {}
 
         self.min_zoom = 0.2
         self.max_zoom = 4.0
@@ -83,13 +84,18 @@ class GraphView(QGraphicsView):
 
     def render_graph(self, graph_data: dict):
         self.scene_obj.blockSignals(True)
+
+        # Guardamos posiciones actuales antes de reconstruir la escena
+        for node_uuid, item in self.nodes_by_uuid.items():
+            self.node_positions[node_uuid] = (item.scenePos().x(), item.scenePos().y())
+
         self.scene_obj.clear()
         self.nodes_by_uuid.clear()
 
         nodes = graph_data["nodes"]
         edges = graph_data["edges"]
 
-        positions = self._calculate_standard_layout(nodes, edges)
+        default_positions = self._calculate_standard_layout(nodes, edges)
 
         for node in nodes:
             item = create_graph_node_item(
@@ -99,7 +105,13 @@ class GraphView(QGraphicsView):
                 size=node.get("size", 100),
             )
 
-            x, y = positions[node["uuid"]]
+            # Si el nodo ya tuvo una posición antes, la recuperamos.
+            # Si no, usamos la posición estándar.
+            x, y = self.node_positions.get(
+                node["uuid"],
+                default_positions[node["uuid"]]
+            )
+
             item.setPos(x, y)
 
             self.scene_obj.addItem(item)
@@ -119,6 +131,10 @@ class GraphView(QGraphicsView):
             target.add_edge(edge_item)
 
         self.scene_obj.blockSignals(False)
+
+    def forget_node_positions(self, node_uuids: list[str]) -> None:
+        for node_uuid in node_uuids:
+            self.node_positions.pop(node_uuid, None)
 
     def select_node_visual(self, node_uuid: Optional[str]):
         self.scene_obj.blockSignals(True)

@@ -124,3 +124,6 @@ class BuilderPage(QWidget):
             return self.current_node.uuid
 
         return None
+    
+    def forget_graph_nodes(self, node_uuids: list[str]) -> None:
+        self.graph_view.forget_node_positions(node_uuids)

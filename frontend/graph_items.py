@@ -33,13 +33,16 @@ class BaseGraphNodeItem(QGraphicsObject):
 
         self.node_uuid = node_uuid
         self.name = name
-        self.size = float(size)
+
+        # Forzamos un tamaño mínimo para que nunca se vea como un punto
+        self.size = max(float(size), 90.0)
+
         self.connected_edges = []
 
         self.setFlags(
-            QGraphicsItem.GraphicsItemFlag.ItemIsMovable |
-            QGraphicsItem.GraphicsItemFlag.ItemIsSelectable |
-            QGraphicsItem.GraphicsItemFlag.ItemSendsGeometryChanges
+            QGraphicsItem.GraphicsItemFlag.ItemIsMovable
+            | QGraphicsItem.GraphicsItemFlag.ItemIsSelectable
+            | QGraphicsItem.GraphicsItemFlag.ItemSendsGeometryChanges
         )
 
         self.setAcceptedMouseButtons(Qt.MouseButton.LeftButton)
@@ -51,8 +54,10 @@ class BaseGraphNodeItem(QGraphicsObject):
         self.font = QFont("Arial", 10, QFont.Weight.Bold)
 
     def boundingRect(self):
-        half = self.size / 2
-        return QRectF(-half, -half, self.size, self.size)
+        """
+        Se redefine en cada subclase.
+        """
+        return QRectF(-50, -50, 100, 100)
 
     def add_edge(self, edge):
         self.connected_edges.append(edge)
@@ -62,16 +67,17 @@ class BaseGraphNodeItem(QGraphicsObject):
             for edge in self.connected_edges:
                 edge.update_position()
 
+        self.update()
         return super().itemChange(change, value)
 
     def _current_pen(self):
         return self.selected_pen if self.isSelected() else self.default_pen
 
-    def _draw_centered_text(self, painter):
+    def _draw_centered_text(self, painter, rect: QRectF):
         painter.setPen(self.text_pen)
         painter.setFont(self.font)
 
-        text_rect = self.boundingRect().adjusted(8, 8, -8, -8)
+        text_rect = rect.adjusted(10, 10, -10, -10)
 
         painter.drawText(
             text_rect,
@@ -83,7 +89,21 @@ class BaseGraphNodeItem(QGraphicsObject):
 class RootNodeItem(BaseGraphNodeItem):
     """
     Raíz: rectángulo con esquinas normales.
+    Más ancho que alto.
     """
+
+    def __init__(self, node_uuid: str, name: str, size: float = 100):
+        super().__init__(node_uuid, name, size)
+        self.width = self.size * 1.8
+        self.height = self.size * 0.9
+
+    def boundingRect(self):
+        return QRectF(
+            -self.width / 2,
+            -self.height / 2,
+            self.width,
+            self.height,
+        )
 
     def paint(self, painter, option, widget=None):
         painter.setRenderHint(painter.RenderHint.Antialiasing)
@@ -94,13 +114,25 @@ class RootNodeItem(BaseGraphNodeItem):
         painter.setPen(self._current_pen())
         painter.drawRect(rect)
 
-        self._draw_centered_text(painter)
+        self._draw_centered_text(painter, rect)
 
 
 class GroupNodeItem(BaseGraphNodeItem):
     """
     Grupo: círculo.
     """
+
+    def __init__(self, node_uuid: str, name: str, size: float = 100):
+        super().__init__(node_uuid, name, size)
+        self.diameter = self.size
+
+    def boundingRect(self):
+        return QRectF(
+            -self.diameter / 2,
+            -self.diameter / 2,
+            self.diameter,
+            self.diameter,
+        )
 
     def paint(self, painter, option, widget=None):
         painter.setRenderHint(painter.RenderHint.Antialiasing)
@@ -111,13 +143,27 @@ class GroupNodeItem(BaseGraphNodeItem):
         painter.setPen(self._current_pen())
         painter.drawEllipse(rect)
 
-        self._draw_centered_text(painter)
+        self._draw_centered_text(painter, rect)
 
 
 class SpaceNodeItem(BaseGraphNodeItem):
     """
     Espacio/clase: rectángulo con esquinas redondeadas.
+    Más ancho que alto.
     """
+
+    def __init__(self, node_uuid: str, name: str, size: float = 100):
+        super().__init__(node_uuid, name, size)
+        self.width = self.size * 1.7
+        self.height = self.size * 0.85
+
+    def boundingRect(self):
+        return QRectF(
+            -self.width / 2,
+            -self.height / 2,
+            self.width,
+            self.height,
+        )
 
     def paint(self, painter, option, widget=None):
         painter.setRenderHint(painter.RenderHint.Antialiasing)
@@ -128,7 +174,7 @@ class SpaceNodeItem(BaseGraphNodeItem):
         painter.setPen(self._current_pen())
         painter.drawRoundedRect(rect, 16, 16)
 
-        self._draw_centered_text(painter)
+        self._draw_centered_text(painter, rect)
 
 
 def create_graph_node_item(node_uuid: str, name: str, node_type: str, size: float = 100):
