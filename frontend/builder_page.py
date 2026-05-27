@@ -65,10 +65,12 @@ class BuilderPage(QWidget):
         self.graph_view.node_double_clicked.connect(self.controller.toggle_group)
 
         # Panel derecho
-        self.properties_panel.name_changed.connect(self.controller.rename_selected_node)
-        self.properties_panel.size_changed.connect(self.controller.update_selected_node_size)
-        self.properties_panel.capacity_changed.connect(self.controller.update_selected_space_capacity)
-        self.properties_panel.delete_requested.connect(self.controller.delete_selected_node)
+        self.properties_panel.properties_changed.connect(
+            self.controller.update_selected_builder_properties
+        )
+        self.properties_panel.delete_requested.connect(
+            self.controller.delete_selected_node
+        )
 
     # ============================================================
     # Métodos llamados por BuilderController
@@ -87,9 +89,9 @@ class BuilderPage(QWidget):
         self.graph_view.select_node_visual(node_uuid)
         self.tree_panel.select_node(node_uuid)
 
-    def show_node_properties(self, node, valid_parents):
+    def show_node_properties(self, node, valid_parents, form_options):
         self.current_node = node
-        self.properties_panel.show_node(node, valid_parents)
+        self.properties_panel.show_node(node, valid_parents, form_options)
 
     def clear_properties_panel(self):
         self.current_node = None

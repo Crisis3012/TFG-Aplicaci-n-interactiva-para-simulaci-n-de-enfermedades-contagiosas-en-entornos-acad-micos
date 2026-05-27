@@ -69,7 +69,9 @@ class BuilderController:
             return
 
         valid_parents = self.faculty.get_valid_parents(self.selected_node_uuid)
-        self.ui.show_node_properties(node, valid_parents)
+        form_options = self._build_form_options()
+
+        self.ui.show_node_properties(node, valid_parents, form_options)
 
     def _build_graph_data(self) -> dict:
         """
@@ -136,6 +138,17 @@ class BuilderController:
             "nodes": nodes,
             "edges": edges,
         }
+    
+    def _build_form_options(self) -> dict:
+        return {
+            "time_options": self.faculty.get_time_options(),
+            "slot_options": self.faculty.get_schedule_slot_options(),
+            "calendar_day_options": self.faculty.get_calendar_day_options(),
+            "space_type_options": [
+                {"uuid": item.uuid, "name": item.name}
+                for item in self.faculty.get_space_types()
+            ],
+        }
 
     # -------------------------
     # SELECCIÓN
@@ -153,7 +166,8 @@ class BuilderController:
         if self.ui is not None:
             self.ui.select_node_visual(node_uuid)
             valid_parents = self.faculty.get_valid_parents(node_uuid)
-            self.ui.show_node_properties(node, valid_parents)
+            form_options = self._build_form_options()
+            self.ui.show_node_properties(node, valid_parents, form_options)
 
     def clear_selection(self) -> None:
         self.selected_node_uuid = None
@@ -344,6 +358,49 @@ class BuilderController:
             return
 
         self.faculty.move_node(node_uuid, new_parent_uuid)
+        self.refresh_all()
+
+    def update_selected_builder_properties(self, values: dict) -> None:
+        if self.selected_node_uuid is None:
+            return
+
+        node = self.faculty.find_node(self.selected_node_uuid)
+
+        if node is None:
+            self.clear_selection()
+            return
+
+        node_type = self._get_node_type(node)
+
+        if node_type == "root":
+            self.faculty.update_faculty_properties(
+                name=values.get("name"),
+                opening_time=values.get("opening_time"),
+                closing_time=values.get("closing_time"),
+                schedule_slot_minutes=values.get("schedule_slot_minutes"),
+                default_ventilated=values.get("default_ventilated"),
+                calendar_days=values.get("calendar_days"),
+            )
+
+        elif node_type == "group":
+            self.faculty.update_group_properties(
+                group_uuid=node.uuid,
+                name=values.get("name"),
+                default_ventilated=values.get("default_ventilated"),
+                opening_time_override=values.get("opening_time_override"),
+                closing_time_override=values.get("closing_time_override"),
+            )
+
+        elif node_type == "space":
+            self.faculty.update_space_properties(
+                node_uuid=node.uuid,
+                name=values.get("name"),
+                space_type_uuid=values.get("space_type_uuid"),
+                ventilated=values.get("ventilated"),
+                opening_time_override=values.get("opening_time_override"),
+                closing_time_override=values.get("closing_time_override"),
+            )
+
         self.refresh_all()
 
     # -------------------------

@@ -8,6 +8,28 @@ import uuid
 
 
 # ============================================================
+# OPCIONES DEL BUILDER
+# ============================================================
+
+TIME_OPTIONS = [
+    "06:00", "07:00", "08:00", "09:00", "10:00", "11:00",
+    "12:00", "13:00", "14:00", "15:00", "16:00", "17:00",
+    "18:00", "19:00", "20:00", "21:00", "22:00"
+]
+
+SLOT_MINUTE_OPTIONS = [15, 30, 60]
+
+CALENDAR_DAY_OPTIONS = [
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+    "sunday",
+]
+
+# ============================================================
 # MODELO DE NODOS
 # ============================================================
 
@@ -31,7 +53,11 @@ class Node:
 @dataclass
 class Group(Node):
     children_uuids: List[str] = field(default_factory=list)
-    expanded: bool = False
+    expanded: bool = True
+
+    default_ventilated: bool = False
+    opening_time_override: Optional[str] = None
+    closing_time_override: Optional[str] = None
 
     def is_group(self) -> bool:
         return True
@@ -39,18 +65,47 @@ class Group(Node):
 
 @dataclass
 class Space(Node):
-    capacity: int = None
+    capacity: Optional[int] = None
+
+    space_type_uuid: Optional[str] = None
+    ventilated: bool = False
+    opening_time_override: Optional[str] = None
+    closing_time_override: Optional[str] = None
+
+    position_x: float = 0.0
+    position_y: float = 0.0
 
     def is_space(self) -> bool:
         return True
-    
+
 
 @dataclass
 class Root(Node):
     children_uuids: List[str] = field(default_factory=list)
 
+    opening_time: str = "08:00"
+    closing_time: str = "20:00"
+    schedule_slot_minutes: int = 30
+    default_ventilated: bool = False
+    calendar_days: List[str] = field(
+        default_factory=lambda: ["monday", "tuesday", "wednesday", "thursday", "friday"]
+    )
+
     def is_root(self) -> bool:
         return True
+
+
+@dataclass
+class SpaceType:
+    uuid: str
+    name: str
+    contact_level: float = 1.0
+    duration_relevance: float = 1.0
+    is_transit_type: bool = False
+    is_recreation_type: bool = False
+    default_ventilated: bool = False
+    mask_effect_relevance: float = 1.0
+    ventilation_effect_relevance: float = 1.0
 
 
 # ============================================================
@@ -84,6 +139,13 @@ class Faculty:
         )
 
         self.nodes[self.root_uuid] = root
+
+        self.space_types: List[SpaceType] = [
+            SpaceType(uuid="classroom", name="Classroom"),
+            SpaceType(uuid="lab", name="Laboratory"),
+            SpaceType(uuid="office", name="Office"),
+            SpaceType(uuid="corridor", name="Corridor", is_transit_type=True),
+        ]
 
     # -------------------------
     # Utilidades internas
@@ -157,6 +219,63 @@ class Faculty:
             current_uuid = current_node.parent_uuid
 
         return False
+    
+    def update_faculty_properties(
+        self,
+        name: Optional[str] = None,
+        opening_time: Optional[str] = None,
+        closing_time: Optional[str] = None,
+        schedule_slot_minutes: Optional[int] = None,
+        default_ventilated: Optional[bool] = None,
+        calendar_days: Optional[List[str]] = None,
+    ) -> None:
+        root = self._get_node(self.root_uuid)
+
+        if not isinstance(root, Root):
+            raise ValueError("La raíz de la facultad no es válida.")
+
+        if name is not None:
+            root.name = name.strip()
+
+        if opening_time is not None:
+            root.opening_time = opening_time
+
+        if closing_time is not None:
+            root.closing_time = closing_time
+
+        if schedule_slot_minutes is not None:
+            root.schedule_slot_minutes = schedule_slot_minutes
+
+        if default_ventilated is not None:
+            root.default_ventilated = default_ventilated
+
+        if calendar_days is not None:
+            root.calendar_days = list(calendar_days)
+
+    def update_group_properties(
+        self,
+        group_uuid: str,
+        name: Optional[str] = None,
+        default_ventilated: Optional[bool] = None,
+        opening_time_override: Optional[str] = None,
+        closing_time_override: Optional[str] = None,
+    ) -> None:
+        node = self._get_node(group_uuid)
+
+        if not isinstance(node, Group):
+            raise ValueError("Solo los grupos pueden tener propiedades de grupo.")
+
+        if name is not None:
+            node.name = name.strip()
+
+        if default_ventilated is not None:
+            node.default_ventilated = default_ventilated
+
+        if opening_time_override is not None:
+            node.opening_time_override = opening_time_override
+
+        if closing_time_override is not None:
+            node.closing_time_override = closing_time_override
 
     # -------------------------
     # API pública básica
@@ -191,8 +310,10 @@ class Faculty:
 
     def get_children(self, node_uuid: str) -> List[Node]:
         node = self._get_node(node_uuid)
-        if not isinstance(node, Group):
+
+        if not isinstance(node, (Root, Group)):
             return []
+
         return [self._get_node(child_uuid) for child_uuid in node.children_uuids]
 
     def find_node(self, node_uuid: str) -> Optional[Node]:
@@ -362,18 +483,42 @@ class Faculty:
     def update_space_properties(
         self,
         node_uuid: str,
+        name: Optional[str] = None,
         capacity: Optional[int] = None,
+        space_type_uuid: Optional[str] = None,
+        ventilated: Optional[bool] = None,
+        opening_time_override: Optional[str] = None,
+        closing_time_override: Optional[str] = None,
+        position_x: Optional[float] = None,
+        position_y: Optional[float] = None,
     ) -> None:
         """
         Actualiza propiedades específicas de un Space.
         """
-
         node = self._get_node(node_uuid)
 
         if not isinstance(node, Space):
             raise ValueError("Solo los espacios pueden tener propiedades de espacio.")
 
-        node.capacity = capacity
+        if name is not None:
+            node.name = name.strip()
+
+        if capacity is not None:
+            node.capacity = capacity
+
+        node.space_type_uuid = space_type_uuid
+
+        if ventilated is not None:
+            node.ventilated = ventilated
+
+        node.opening_time_override = opening_time_override
+        node.closing_time_override = closing_time_override
+
+        if position_x is not None:
+            node.position_x = position_x
+
+        if position_y is not None:
+            node.position_y = position_y
 
     def update_node_size(self, node_uuid: str, size: float) -> None:
         """
@@ -410,6 +555,21 @@ class Faculty:
         node = self._get_node(node_uuid)
 
         self.selected_node = node
+
+    def get_time_options(self) -> list[str]:
+        return TIME_OPTIONS
+
+
+    def get_schedule_slot_options(self) -> list[int]:
+        return SLOT_MINUTE_OPTIONS
+
+
+    def get_calendar_day_options(self) -> list[str]:
+        return CALENDAR_DAY_OPTIONS
+
+
+    def get_space_types(self) -> list[SpaceType]:
+        return self.space_types
 
     # -------------------------
     # Carga desde CSV

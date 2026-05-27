@@ -15,3 +15,6 @@
 
 - Versión 0.0.6:
     Se ha mejorado la UI haciendo que los nodos se vean con las formas correctas, que sus posiciones no se reinicien cada vez que se redibuja el grafo al hacer una acción (expandir/contraer un grupo, eliminar un nodo, crear un nodo, etc.) y se ha cambiado la eliminación de nodos para que sus posiciones no se queden guardadas en memoria y la vayan sobrecargando de información que ya no es útil
+
+- Versión 0.0.7:
+    Se ha terminado el Space Builder con los parámetros acordados (opcionales y obligatorios), además de con el panel izquierdo funcional. Tambien funcionan ya todas las funciones de modificacion de parámetros y modificación de la visualización. Queda incorporar el Agent Builder para las carreras y horarios y entonces podemos empezar con la simulación.
