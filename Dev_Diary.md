@@ -18,3 +18,6 @@
 
 - Versión 0.0.7:
     Se ha terminado el Space Builder con los parámetros acordados (opcionales y obligatorios), además de con el panel izquierdo funcional. Tambien funcionan ya todas las funciones de modificacion de parámetros y modificación de la visualización. Queda incorporar el Agent Builder para las carreras y horarios y entonces podemos empezar con la simulación.
+
+- Versión 0.0.8: 
+    Casi terminado el builder, queda arreglar la introducción de los horarios que se ha roto y luego hacer fine tunning y debugging. En general lo que se ha hecho es añadir un botón en el builder que cambia la vista entre el builder de espacios y el builder de carreras. En el builder de espacios se ha arreglado el panel derecho e izquierdo (aunque en el izquierdo habría que modificar el color del fondo o del texto) y ya quedan todas las funcionalidades teóricamente terminadas. En el bilder de carreras todo funciona correctamente menos los horarios. Cuando se arregle esto y tengamos el builder totalmente funcional pasamos a la version 0.1.0 y empezamos a trabajar en la simulación.

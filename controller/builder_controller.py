@@ -10,33 +10,53 @@ class BuilderController:
         self.faculty = faculty
         self.ui = ui
         self.selected_node_uuid: Optional[str] = None
+        self.builder_mode: str = "space"   # "space" o "agent"
 
     def attach_ui(self, ui: Any) -> None:
         self.ui = ui
+
+    # -------------------------
+    # MODO DE BUILDER
+    # -------------------------
+
+    def get_builder_mode(self) -> str:
+        return self.builder_mode
+
+    def set_builder_mode(self, mode: str) -> None:
+        if mode not in {"space", "agent"}:
+            return
+
+        if self.builder_mode == mode:
+            if self.ui is not None and hasattr(self.ui, "update_builder_mode"):
+                self.ui.update_builder_mode(mode)
+            return
+
+        self.builder_mode = mode
+        self.selected_node_uuid = None
+        self.refresh_all()
+
+    def toggle_builder_mode(self) -> None:
+        if self.builder_mode == "space":
+            self.set_builder_mode("agent")
+        else:
+            self.set_builder_mode("space")
 
     # -------------------------
     # CARGA Y REFRESCO GENERAL
     # -------------------------
 
     def load_builder(self) -> None:
-        """
-        Carga inicial del Builder.
-        Se llamará al entrar en la pantalla de construcción.
-        """
         self.refresh_all()
 
     def refresh_all(self) -> None:
-        """
-        Refresca toda la UI del Builder:
-        - panel izquierdo: árbol
-        - panel central: grafo
-        - panel derecho: propiedades del nodo seleccionado
-        """
         if self.ui is None:
             return
 
         root = self.faculty.get_root()
         graph_data = self._build_graph_data()
+
+        if hasattr(self.ui, "update_builder_mode"):
+            self.ui.update_builder_mode(self.builder_mode)
 
         self.ui.render_tree(root)
         self.ui.render_graph(graph_data)
@@ -44,7 +64,7 @@ class BuilderController:
         if self.selected_node_uuid is not None:
             selected_node = self.faculty.find_node(self.selected_node_uuid)
 
-            if selected_node is None:
+            if selected_node is None or not self._node_belongs_to_active_builder(selected_node):
                 self.selected_node_uuid = None
                 self.ui.select_node_visual(None)
                 self.ui.clear_properties_panel()
@@ -62,30 +82,22 @@ class BuilderController:
 
         node = self.faculty.find_node(self.selected_node_uuid)
 
-        if node is None:
+        if node is None or not self._node_belongs_to_active_builder(node):
             self.selected_node_uuid = None
             self.ui.select_node_visual(None)
             self.ui.clear_properties_panel()
             return
 
         valid_parents = self.faculty.get_valid_parents(self.selected_node_uuid)
-        form_options = self._build_form_options()
+        form_options = self._build_form_options(node)
 
         self.ui.show_node_properties(node, valid_parents, form_options)
 
     def _build_graph_data(self) -> dict:
-        """
-        Convierte el estado del backend en datos simples para el frontend.
-
-        En vez de depender de get_children(), las aristas se construyen
-        leyendo el parent_uuid de cada nodo visible.
-        Eso es más robusto para la visualización del grafo.
-        """
         root = self.faculty.get_root()
         visible_nodes = self.faculty.get_visible_nodes()
 
-        # Aseguramos que root siempre esté incluida
-        visible_by_uuid = {node.uuid: node for node in visible_nodes}
+        visible_by_uuid = {node.uuid: node for node in visible_nodes if self._node_belongs_to_active_builder(node)}
         visible_by_uuid[root.uuid] = root
 
         visible_nodes = list(visible_by_uuid.values())
@@ -104,43 +116,27 @@ class BuilderController:
                 "size": getattr(node, "size", 100),
             })
 
-        # Construimos edges leyendo parent_uuid
         for node in visible_nodes:
             if node.uuid == root.uuid:
                 continue
 
             parent_uuid = getattr(node, "parent_uuid", None)
-
-            # Si no tiene padre explícito, lo conectamos a root
             if parent_uuid is None:
                 parent_uuid = root.uuid
 
-            # Solo dibujamos la arista si el padre también es visible
             if parent_uuid in visible_uuids:
                 edges.append({
                     "source": parent_uuid,
                     "target": node.uuid,
                 })
 
-        print("NODES:")
-        for n in nodes:
-            print(n)
-
-        print("EDGES:")
-        for e in edges:
-            print(e)
-
-        print("PARENTS:")
-        for node in visible_nodes:
-            print(node.name, node.uuid, getattr(node, "parent_uuid", None))
-
         return {
             "nodes": nodes,
             "edges": edges,
         }
-    
-    def _build_form_options(self) -> dict:
-        return {
+
+    def _build_form_options(self, node=None) -> dict:
+        options = {
             "time_options": self.faculty.get_time_options(),
             "slot_options": self.faculty.get_schedule_slot_options(),
             "calendar_day_options": self.faculty.get_calendar_day_options(),
@@ -148,7 +144,76 @@ class BuilderController:
                 {"uuid": item.uuid, "name": item.name}
                 for item in self.faculty.get_space_types()
             ],
+            "space_options": [
+                {"uuid": item.uuid, "name": item.name}
+                for item in self.faculty.get_all_spaces()
+            ],
+            "schedule_days": list(self.faculty.get_root().calendar_days),
+            "schedule_rows": self._build_schedule_rows(),
         }
+
+        if node is not None and self._get_node_type(node) == "coursegroup":
+            parent_course = self.faculty.find_node(getattr(node, "course_uuid", None))
+            if parent_course is not None:
+                options["course_base_schedule"] = list(getattr(parent_course, "base_schedule", []))
+            else:
+                options["course_base_schedule"] = []
+
+        return options
+    
+    def _time_to_minutes(self, time_str: str) -> int:
+        hours, minutes = time_str.split(":")
+        return int(hours) * 60 + int(minutes)
+
+
+    def _minutes_to_time(self, total_minutes: int) -> str:
+        hours = total_minutes // 60
+        minutes = total_minutes % 60
+        return f"{hours:02d}:{minutes:02d}"
+
+
+    def _build_schedule_rows(self) -> list[dict]:
+        root = self.faculty.get_root()
+
+        start_minutes = self._time_to_minutes(root.opening_time)
+        end_minutes = self._time_to_minutes(root.closing_time)
+        slot_minutes = root.schedule_slot_minutes
+
+        rows = []
+        current = start_minutes
+
+        while current + slot_minutes <= end_minutes:
+            row_start = self._minutes_to_time(current)
+            row_end = self._minutes_to_time(current + slot_minutes)
+
+            rows.append({
+                "start_time": row_start,
+                "end_time": row_end,
+                "label": f"{row_start} - {row_end}",
+            })
+
+            current += slot_minutes
+
+        return rows
+
+
+    def _build_schedule_blocks_from_values(self, block_dicts: list[dict]) -> list:
+        blocks = []
+
+        for item in block_dicts:
+            block = self.faculty.create_schedule_block(
+                day_of_week=item["day_of_week"],
+                start_time=item["start_time"],
+                end_time=item["end_time"],
+                space_uuid=item["space_uuid"],
+            )
+            blocks.append(block)
+
+        return blocks
+
+    def get_children_for_current_mode(self, node_uuid: str):
+        children = self.faculty.get_children(node_uuid)
+        return [child for child in children if self._node_belongs_to_active_builder(child)]
 
     # -------------------------
     # SELECCIÓN
@@ -161,12 +226,15 @@ class BuilderController:
             self._show_error(f"No se ha encontrado el nodo con uuid: {node_uuid}")
             return
 
+        if not self._node_belongs_to_active_builder(node):
+            return
+
         self.selected_node_uuid = node_uuid
 
         if self.ui is not None:
             self.ui.select_node_visual(node_uuid)
             valid_parents = self.faculty.get_valid_parents(node_uuid)
-            form_options = self._build_form_options()
+            form_options = self._build_form_options(node)
             self.ui.show_node_properties(node, valid_parents, form_options)
 
     def clear_selection(self) -> None:
@@ -218,13 +286,59 @@ class BuilderController:
 
         self.refresh_all()
 
-    def create_group_under_selected_parent(self, name: str = "Nuevo grupo") -> None:
-        parent_uuid = self._get_selected_parent_uuid()
-        self.create_group(name=name, parent_uuid=parent_uuid)
+    def create_career(self, name: str = "Nueva carrera", select_after_create: bool = True) -> None:
+        career = self.faculty.create_career(name=name)
 
-    def create_space_under_selected_parent(self, name: str = "Nuevo espacio") -> None:
-        parent_uuid = self._get_selected_parent_uuid()
-        self.create_space(name=name, parent_uuid=parent_uuid)
+        if select_after_create:
+            self.selected_node_uuid = career.uuid
+
+        self.refresh_all()
+
+    def create_course(self, name: str = "Nuevo curso", career_uuid: Optional[str] = None, select_after_create: bool = True) -> None:
+        if career_uuid is None:
+            self._show_error("Selecciona una carrera para crear un curso.")
+            return
+
+        course = self.faculty.create_course(name=name, career_uuid=career_uuid)
+
+        if select_after_create:
+            self.selected_node_uuid = course.uuid
+
+        self.refresh_all()
+
+    def create_course_group(self, name: str = "Nuevo grupo", course_uuid: Optional[str] = None, select_after_create: bool = True) -> None:
+        if course_uuid is None:
+            self._show_error("Selecciona un curso para crear un grupo.")
+            return
+
+        group = self.faculty.create_course_group(name=name, course_uuid=course_uuid)
+
+        if select_after_create:
+            self.selected_node_uuid = group.uuid
+
+        self.refresh_all()
+
+    def create_primary_node(self) -> None:
+        if self.builder_mode == "space":
+            parent_uuid = self._get_selected_space_parent_uuid()
+            self.create_group("Nuevo grupo", parent_uuid=parent_uuid)
+        else:
+            self.create_career("Nueva carrera")
+
+    def create_secondary_node(self) -> None:
+        if self.builder_mode == "space":
+            parent_uuid = self._get_selected_space_parent_uuid()
+            self.create_space("Nuevo espacio", parent_uuid=parent_uuid)
+        else:
+            career_uuid = self._get_selected_career_uuid_for_course_creation()
+            self.create_course("Nuevo curso", career_uuid=career_uuid)
+
+    def create_tertiary_node(self) -> None:
+        if self.builder_mode == "space":
+            return
+
+        course_uuid = self._get_selected_course_uuid_for_group_creation()
+        self.create_course_group("Nuevo grupo", course_uuid=course_uuid)
 
     # -------------------------
     # EDICIÓN DE NODOS
@@ -254,38 +368,6 @@ class BuilderController:
 
         self.refresh_all()
 
-    def rename_node(self, node_uuid: str, new_name: str) -> None:
-        new_name = new_name.strip()
-
-        if not new_name:
-            self._show_error("El nombre no puede estar vacío.")
-            self.refresh_all()
-            return
-
-        node = self.faculty.find_node(node_uuid)
-
-        if node is None:
-            self._show_error(f"No se ha encontrado el nodo con uuid: {node_uuid}")
-            return
-
-        if self._is_root(node):
-            self.faculty.rename_faculty(new_name)
-        else:
-            self.faculty.rename_node(node_uuid, new_name)
-
-        self.refresh_all()
-
-    def rename_faculty(self, new_name: str) -> None:
-        new_name = new_name.strip()
-
-        if not new_name:
-            self._show_error("El nombre de la facultad no puede estar vacío.")
-            self.refresh_all()
-            return
-
-        self.faculty.rename_faculty(new_name)
-        self.refresh_all()
-
     def delete_selected_node(self) -> None:
         if self.selected_node_uuid is None:
             return
@@ -304,28 +386,6 @@ class BuilderController:
         deleted_uuids = self._collect_subtree_uuids(node_uuid)
 
         self.selected_node_uuid = None
-
-        self.faculty.delete_node(node_uuid)
-        self.refresh_all()
-
-        if self.ui is not None and hasattr(self.ui, "forget_graph_nodes"):
-            self.ui.forget_graph_nodes(deleted_uuids)
-
-    def delete_node(self, node_uuid: str) -> None:
-        node = self.faculty.find_node(node_uuid)
-
-        if node is None:
-            self._show_error(f"No se ha encontrado el nodo con uuid: {node_uuid}")
-            return
-
-        if self._is_root(node):
-            self._show_error("No se puede eliminar la raíz de la facultad.")
-            return
-
-        deleted_uuids = self._collect_subtree_uuids(node_uuid)
-
-        if self.selected_node_uuid == node_uuid:
-            self.selected_node_uuid = None
 
         self.faculty.delete_node(node_uuid)
         self.refresh_all()
@@ -382,14 +442,23 @@ class BuilderController:
                 calendar_days=values.get("calendar_days"),
             )
 
-        elif node_type == "group":
-            self.faculty.update_group_properties(
-                group_uuid=node.uuid,
-                name=values.get("name"),
-                default_ventilated=values.get("default_ventilated"),
-                opening_time_override=values.get("opening_time_override"),
-                closing_time_override=values.get("closing_time_override"),
-            )
+        elif node_type in {"group", "spacegroup"}:
+            if hasattr(self.faculty, "update_space_group_properties"):
+                self.faculty.update_space_group_properties(
+                    group_uuid=node.uuid,
+                    name=values.get("name"),
+                    default_ventilated=values.get("default_ventilated"),
+                    opening_time_override=values.get("opening_time_override"),
+                    closing_time_override=values.get("closing_time_override"),
+                )
+            else:
+                self.faculty.update_group_properties(
+                    group_uuid=node.uuid,
+                    name=values.get("name"),
+                    default_ventilated=values.get("default_ventilated"),
+                    opening_time_override=values.get("opening_time_override"),
+                    closing_time_override=values.get("closing_time_override"),
+                )
 
         elif node_type == "space":
             self.faculty.update_space_properties(
@@ -401,23 +470,68 @@ class BuilderController:
                 closing_time_override=values.get("closing_time_override"),
             )
 
+        elif node_type == "career":
+            self.faculty.update_career_properties(
+                career_uuid=node.uuid,
+                name=values.get("name"),
+                students_by_year=values.get("students_by_year"),
+                default_attendance_rate=values.get("default_attendance_rate"),
+                mean_age=values.get("mean_age"),
+                std_age=values.get("std_age"),
+                sex_ratio=values.get("sex_ratio"),
+            )
+
+        elif node_type == "course":
+            self.faculty.update_course_properties(
+                course_uuid=node.uuid,
+                name=values.get("name"),
+                number_of_students=values.get("number_of_students"),
+                attendance_rate=values.get("attendance_rate"),
+                mean_age=values.get("mean_age"),
+                std_age=values.get("std_age"),
+                sex_ratio=values.get("sex_ratio"),
+            )
+
+            if "base_schedule_blocks" in values:
+                blocks = self._build_schedule_blocks_from_values(values["base_schedule_blocks"])
+                self.faculty.set_course_base_schedule(node.uuid, blocks)
+
+        elif node_type == "coursegroup":
+            self.faculty.update_course_group_properties(
+                group_uuid=node.uuid,
+                name=values.get("name"),
+                number_of_students=values.get("number_of_students"),
+                attendance_rate=values.get("attendance_rate"),
+                mean_age=values.get("mean_age"),
+                std_age=values.get("std_age"),
+                sex_ratio=values.get("sex_ratio"),
+            )
+
+            if "schedule_override_blocks" in values:
+                blocks = self._build_schedule_blocks_from_values(values["schedule_override_blocks"])
+                self.faculty.set_course_group_schedule_overrides(node.uuid, blocks)
+
         self.refresh_all()
 
     # -------------------------
-    # GRUPOS
+    # CONTENEDORES / EXPANSIÓN
     # -------------------------
 
-    def toggle_group(self, group_uuid: str) -> None:
-        node = self.faculty.find_node(group_uuid)
+    def toggle_group(self, node_uuid: str) -> None:
+        node = self.faculty.find_node(node_uuid)
 
         if node is None:
-            self._show_error(f"No se ha encontrado el grupo con uuid: {group_uuid}")
+            self._show_error(f"No se ha encontrado el nodo con uuid: {node_uuid}")
             return
 
-        if not self._is_group(node):
+        if not self._is_expandable_container(node):
             return
 
-        self.faculty.toggle_group_expanded(group_uuid)
+        if hasattr(self.faculty, "toggle_container_expanded"):
+            self.faculty.toggle_container_expanded(node_uuid)
+        else:
+            self.faculty.toggle_group_expanded(node_uuid)
+
         self.refresh_all()
 
     def toggle_selected_group(self) -> None:
@@ -426,88 +540,11 @@ class BuilderController:
 
         self.toggle_group(self.selected_node_uuid)
 
-    def set_group_expanded(self, group_uuid: str, expanded: bool) -> None:
-        node = self.faculty.find_node(group_uuid)
-
-        if node is None:
-            self._show_error(f"No se ha encontrado el grupo con uuid: {group_uuid}")
-            return
-
-        if not self._is_group(node):
-            return
-
-        self.faculty.set_group_expanded(group_uuid, expanded)
-        self.refresh_all()
-
-    # -------------------------
-    # PROPIEDADES VISUALES
-    # -------------------------
-
-    def update_selected_node_size(self, size: float) -> None:
-        if self.selected_node_uuid is None:
-            return
-
-        self.update_node_size(self.selected_node_uuid, size)
-
-    def update_node_size(self, node_uuid: str, size: float) -> None:
-        node = self.faculty.find_node(node_uuid)
-
-        if node is None:
-            self._show_error(f"No se ha encontrado el nodo con uuid: {node_uuid}")
-            return
-
-        size = float(size)
-
-        if size <= 0:
-            self._show_error("El tamaño del nodo debe ser mayor que 0.")
-            return
-
-        self.faculty.update_node_size(node_uuid, size)
-        self.refresh_all()
-
-    # -------------------------
-    # PROPIEDADES DE ESPACIOS
-    # -------------------------
-
-    def update_selected_space_capacity(self, capacity: Optional[int]) -> None:
-        if self.selected_node_uuid is None:
-            return
-
-        self.update_space_capacity(self.selected_node_uuid, capacity)
-
-    def update_space_capacity(self, node_uuid: str, capacity: Optional[int]) -> None:
-        node = self.faculty.find_node(node_uuid)
-
-        if node is None:
-            self._show_error(f"No se ha encontrado el espacio con uuid: {node_uuid}")
-            return
-
-        if not self._is_space(node):
-            return
-
-        if capacity is not None and capacity < 0:
-            self._show_error("La capacidad no puede ser negativa.")
-            return
-
-        self.faculty.update_space_properties(
-            node_uuid=node_uuid,
-            capacity=capacity,
-        )
-
-        self.refresh_all()
-
     # -------------------------
     # HELPERS
     # -------------------------
 
-    def _get_selected_parent_uuid(self) -> Optional[str]:
-        """
-        Devuelve el uuid del padre donde se debería crear un nuevo nodo.
-
-        Si no hay selección, el backend usará la raíz porque parent_uuid=None.
-        Si la selección es Root o Group, se crea dentro de ese nodo.
-        Si la selección es Space, se crea en la raíz por ahora.
-        """
+    def _get_selected_space_parent_uuid(self) -> Optional[str]:
         if self.selected_node_uuid is None:
             return None
 
@@ -516,30 +553,60 @@ class BuilderController:
         if selected_node is None:
             return None
 
-        if self._is_root(selected_node) or self._is_group(selected_node):
+        if self._get_node_type(selected_node) in {"root", "group", "spacegroup"}:
             return selected_node.uuid
 
         return None
 
-    def _get_node_type(self, node: Any) -> str:
-        """
-        Devuelve el tipo de nodo como string estable para el frontend.
+    def _get_selected_career_uuid_for_course_creation(self) -> Optional[str]:
+        if self.selected_node_uuid is None:
+            return None
 
-        El frontend espera:
-        - root
-        - group
-        - space
-        """
+        node = self.faculty.find_node(self.selected_node_uuid)
+        if node is None:
+            return None
+
+        if self._get_node_type(node) == "career":
+            return node.uuid
+
+        return None
+
+    def _get_selected_course_uuid_for_group_creation(self) -> Optional[str]:
+        if self.selected_node_uuid is None:
+            return None
+
+        node = self.faculty.find_node(self.selected_node_uuid)
+        if node is None:
+            return None
+
+        node_type = self._get_node_type(node)
+
+        if node_type == "course":
+            return node.uuid
+
+        if node_type == "coursegroup":
+            return getattr(node, "course_uuid", None)
+
+        return None
+
+    def _node_belongs_to_active_builder(self, node: Any) -> bool:
+        node_type = self._get_node_type(node)
+
+        if self.builder_mode == "space":
+            return node_type in {"root", "group", "spacegroup", "space"}
+
+        return node_type in {"root", "career", "course", "coursegroup"}
+
+    def _get_node_type(self, node: Any) -> str:
         return node.__class__.__name__.lower()
 
     def _is_root(self, node: Any) -> bool:
         return self._get_node_type(node) == "root"
 
-    def _is_group(self, node: Any) -> bool:
-        return self._get_node_type(node) == "group"
-
-    def _is_space(self, node: Any) -> bool:
-        return self._get_node_type(node) == "space"
+    def _is_expandable_container(self, node: Any) -> bool:
+        return self._get_node_type(node) in {
+            "group", "spacegroup", "career", "course", "coursegroup"
+        }
 
     def _show_error(self, message: str) -> None:
         if self.ui is not None:
@@ -548,10 +615,6 @@ class BuilderController:
             print(f"[BuilderController error] {message}")
 
     def _collect_subtree_uuids(self, node_uuid: str) -> list[str]:
-        """
-        Devuelve el uuid del nodo y de todos sus descendientes.
-        Sirve para limpiar la caché visual del grafo al borrar nodos.
-        """
         uuids = [node_uuid]
 
         for child in self.faculty.get_children(node_uuid):

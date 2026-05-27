@@ -10,45 +10,70 @@ from frontend.styles import LEFT_PANEL_STYLE
 
 class BuilderTreePanel(QFrame):
     node_selected = Signal(str)
-    create_group_requested = Signal()
-    create_space_requested = Signal()
+
+    create_primary_requested = Signal()
+    create_secondary_requested = Signal()
+    create_tertiary_requested = Signal()
+
     delete_requested = Signal()
-    toggle_group_requested = Signal()
+    toggle_container_requested = Signal()
 
     def __init__(self):
         super().__init__()
 
+        self.current_mode = "space"
+
         self.setStyleSheet(LEFT_PANEL_STYLE)
         self._build_ui()
+        self.set_mode("space")
 
     def _build_ui(self):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(10, 10, 10, 10)
         layout.setSpacing(8)
 
-        title = QLabel("Facultad")
-        title.setFont(QFont("Arial", 13, QFont.Weight.Bold))
+        self.title = QLabel("Space Builder")
+        self.title.setFont(QFont("Arial", 13, QFont.Weight.Bold))
 
         self.tree = QTreeWidget()
         self.tree.setHeaderHidden(True)
         self.tree.itemClicked.connect(self._on_item_clicked)
 
-        self.btn_add_group = QPushButton("Crear grupo")
-        self.btn_add_space = QPushButton("Crear espacio")
+        self.btn_primary = QPushButton()
+        self.btn_secondary = QPushButton()
+        self.btn_tertiary = QPushButton()
         self.btn_toggle = QPushButton("Expandir/contraer")
         self.btn_delete = QPushButton("Eliminar")
 
-        self.btn_add_group.clicked.connect(self.create_group_requested.emit)
-        self.btn_add_space.clicked.connect(self.create_space_requested.emit)
-        self.btn_toggle.clicked.connect(self.toggle_group_requested.emit)
+        self.btn_primary.clicked.connect(self.create_primary_requested.emit)
+        self.btn_secondary.clicked.connect(self.create_secondary_requested.emit)
+        self.btn_tertiary.clicked.connect(self.create_tertiary_requested.emit)
+        self.btn_toggle.clicked.connect(self.toggle_container_requested.emit)
         self.btn_delete.clicked.connect(self.delete_requested.emit)
 
-        layout.addWidget(title)
+        layout.addWidget(self.title)
         layout.addWidget(self.tree)
-        layout.addWidget(self.btn_add_group)
-        layout.addWidget(self.btn_add_space)
+        layout.addWidget(self.btn_primary)
+        layout.addWidget(self.btn_secondary)
+        layout.addWidget(self.btn_tertiary)
         layout.addWidget(self.btn_toggle)
         layout.addWidget(self.btn_delete)
+
+    def set_mode(self, mode: str):
+        self.current_mode = mode
+
+        if mode == "space":
+            self.title.setText("Space Builder")
+            self.btn_primary.setText("Crear grupo")
+            self.btn_secondary.setText("Crear espacio")
+            self.btn_tertiary.hide()
+
+        else:
+            self.title.setText("Agent Builder")
+            self.btn_primary.setText("Crear carrera")
+            self.btn_secondary.setText("Crear curso")
+            self.btn_tertiary.setText("Crear grupo de curso")
+            self.btn_tertiary.show()
 
     def render_tree(self, root, get_children_func):
         self.tree.clear()

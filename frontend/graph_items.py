@@ -33,8 +33,6 @@ class BaseGraphNodeItem(QGraphicsObject):
 
         self.node_uuid = node_uuid
         self.name = name
-
-        # Forzamos un tamaño mínimo para que nunca se vea como un punto
         self.size = max(float(size), 90.0)
 
         self.connected_edges = []
@@ -54,9 +52,6 @@ class BaseGraphNodeItem(QGraphicsObject):
         self.font = QFont("Arial", 10, QFont.Weight.Bold)
 
     def boundingRect(self):
-        """
-        Se redefine en cada subclase.
-        """
         return QRectF(-50, -50, 100, 100)
 
     def add_edge(self, edge):
@@ -87,11 +82,6 @@ class BaseGraphNodeItem(QGraphicsObject):
 
 
 class RootNodeItem(BaseGraphNodeItem):
-    """
-    Raíz: rectángulo con esquinas normales.
-    Más ancho que alto.
-    """
-
     def __init__(self, node_uuid: str, name: str, size: float = 100):
         super().__init__(node_uuid, name, size)
         self.width = self.size * 1.8
@@ -118,13 +108,10 @@ class RootNodeItem(BaseGraphNodeItem):
 
 
 class GroupNodeItem(BaseGraphNodeItem):
-    """
-    Grupo: círculo.
-    """
-
-    def __init__(self, node_uuid: str, name: str, size: float = 100):
+    def __init__(self, node_uuid: str, name: str, size: float = 100, color: str = "#75d7e0"):
         super().__init__(node_uuid, name, size)
         self.diameter = self.size
+        self.fill_color = color
 
     def boundingRect(self):
         return QRectF(
@@ -139,7 +126,7 @@ class GroupNodeItem(BaseGraphNodeItem):
 
         rect = self.boundingRect()
 
-        painter.setBrush(QBrush(QColor("#75d7e0")))
+        painter.setBrush(QBrush(QColor(self.fill_color)))
         painter.setPen(self._current_pen())
         painter.drawEllipse(rect)
 
@@ -147,11 +134,6 @@ class GroupNodeItem(BaseGraphNodeItem):
 
 
 class SpaceNodeItem(BaseGraphNodeItem):
-    """
-    Espacio/clase: rectángulo con esquinas redondeadas.
-    Más ancho que alto.
-    """
-
     def __init__(self, node_uuid: str, name: str, size: float = 100):
         super().__init__(node_uuid, name, size)
         self.width = self.size * 1.7
@@ -183,8 +165,17 @@ def create_graph_node_item(node_uuid: str, name: str, node_type: str, size: floa
     if node_type == "root":
         return RootNodeItem(node_uuid=node_uuid, name=name, size=size)
 
-    if node_type == "group":
-        return GroupNodeItem(node_uuid=node_uuid, name=name, size=size)
+    if node_type in {"group", "spacegroup"}:
+        return GroupNodeItem(node_uuid=node_uuid, name=name, size=size, color="#75d7e0")
+
+    if node_type == "career":
+        return GroupNodeItem(node_uuid=node_uuid, name=name, size=size, color="#8bd17c")
+
+    if node_type == "course":
+        return GroupNodeItem(node_uuid=node_uuid, name=name, size=size, color="#f2c46d")
+
+    if node_type == "coursegroup":
+        return GroupNodeItem(node_uuid=node_uuid, name=name, size=size, color="#c6a4ff")
 
     if node_type == "space":
         return SpaceNodeItem(node_uuid=node_uuid, name=name, size=size)
