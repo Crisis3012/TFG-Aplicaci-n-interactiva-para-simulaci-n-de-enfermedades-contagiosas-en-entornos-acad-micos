@@ -29,6 +29,8 @@ class MainWindow(QWidget):
         self.stacked.addWidget(self.menu_page)      # index 0
         self.stacked.addWidget(self.builder_page)   # index 1
 
+        self.menu_page.refresh_faculty_selector()
+
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)

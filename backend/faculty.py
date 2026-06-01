@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import json
 from pathlib import Path
 from typing import Dict, List, Optional
 import csv
@@ -289,7 +290,7 @@ class Faculty:
             return isinstance(child, CourseGroup)
 
         if isinstance(parent, CourseGroup):
-            return isinstance(child, CourseGroup)
+            return False
 
         return False
 
@@ -320,6 +321,44 @@ class Faculty:
                 block.end_time,
             ),
         )
+
+    def _value_to_csv(self, value):
+        if value is None:
+            return ""
+        if isinstance(value, bool):
+            return "1" if value else "0"
+        return str(value)
+
+
+    @staticmethod
+    def _csv_to_optional_str(value: str):
+        value = (value or "").strip()
+        return value if value != "" else None
+
+
+    @staticmethod
+    def _csv_to_optional_int(value: str):
+        value = (value or "").strip()
+        return int(value) if value != "" else None
+
+
+    @staticmethod
+    def _csv_to_optional_float(value: str):
+        value = (value or "").strip()
+        return float(value) if value != "" else None
+
+
+    @staticmethod
+    def _csv_to_bool(value: str, default: bool = False):
+        value = (value or "").strip().lower()
+
+        if value in {"1", "true", "yes", "sí", "si"}:
+            return True
+
+        if value in {"0", "false", "no"}:
+            return False
+
+        return default
 
     # -------------------------
     # Propiedades generales
@@ -627,7 +666,7 @@ class Faculty:
         name: str,
         course_uuid: str,
         node_uuid: Optional[str] = None,
-        copy_course_schedule: bool = True,
+        copy_course_schedule: bool = False,
     ) -> CourseGroup:
         if node_uuid is None:
             node_uuid = self._generate_uuid()
@@ -643,8 +682,9 @@ class Faculty:
             course_uuid=course_uuid,
         )
 
-        if copy_course_schedule:
-            group.schedule_overrides = self._clone_schedule_blocks(parent.base_schedule)
+        # No copiamos el horario del curso.
+        # El grupo lo hereda visualmente desde course_base_schedule.
+        group.schedule_overrides = []
 
         if not self._can_parent_accept_child(parent, group):
             raise ValueError("Ese nodo no puede contener grupos de curso.")
@@ -930,20 +970,21 @@ class Faculty:
         if not isinstance(node, CourseGroup):
             raise ValueError("El nodo no es un grupo de curso.")
 
-        parent_course = self._get_node(node.parent_uuid) if node.parent_uuid else None
+        parent = self._get_node(node.parent_uuid) if node.parent_uuid else None
 
-        if not isinstance(parent_course, Course):
-            return self._sort_schedule_blocks(list(node.schedule_overrides))
-
-        base_blocks = list(parent_course.base_schedule)
-        override_blocks = list(node.schedule_overrides)
+        if isinstance(parent, Course):
+            inherited_blocks = list(parent.base_schedule)
+        elif isinstance(parent, CourseGroup):
+            inherited_blocks = self.get_effective_schedule_for_course_group(parent.uuid)
+        else:
+            inherited_blocks = []
 
         merged_by_slot = {
             self._schedule_block_key(block): block
-            for block in base_blocks
+            for block in inherited_blocks
         }
 
-        for block in override_blocks:
+        for block in node.schedule_overrides:
             merged_by_slot[self._schedule_block_key(block)] = block
 
         return self._sort_schedule_blocks(list(merged_by_slot.values()))
@@ -1067,6 +1108,234 @@ class Faculty:
             faculty._attach_child(desired_parent_uuid, node_uuid)
 
         return faculty
+    
+    @classmethod
+    def load_from_folder(cls, folder_path: str | Path) -> "Faculty":
+        folder_path = Path(folder_path)
+
+        faculty = cls()
+        faculty.nodes = {}
+        faculty.warnings = []
+
+        config_path = folder_path / "faculty_config.json"
+        nodes_path = folder_path / "nodes.csv"
+        schedules_path = folder_path / "schedules.csv"
+
+        if not config_path.exists():
+            raise FileNotFoundError(f"No existe faculty_config.json en {folder_path}")
+
+        with config_path.open("r", encoding="utf-8") as f:
+            config = json.load(f)
+
+        root_uuid = config.get("root_uuid") or faculty._generate_uuid()
+        faculty.root_uuid = root_uuid
+
+        root = Root(
+            uuid=root_uuid,
+            name=config.get("name", cls.ROOT_NAME),
+            parent_uuid=None,
+            opening_time=config.get("opening_time", "08:00"),
+            closing_time=config.get("closing_time", "20:00"),
+            schedule_slot_minutes=int(config.get("schedule_slot_minutes", 30)),
+            default_ventilated=bool(config.get("default_ventilated", False)),
+            calendar_days=list(config.get("calendar_days", ["monday", "tuesday", "wednesday", "thursday", "friday"])),
+            expanded=True,
+        )
+
+        faculty.nodes[root.uuid] = root
+
+        if nodes_path.exists():
+            faculty._load_nodes_csv(nodes_path)
+
+        faculty._rebuild_parent_child_links()
+
+        if schedules_path.exists():
+            faculty._load_schedules_csv(schedules_path)
+
+        return faculty
+    
+    def _load_nodes_csv(self, path: Path) -> None:
+        with path.open("r", encoding="utf-8", newline="") as f:
+            reader = csv.DictReader(f)
+
+            for line_number, row in enumerate(reader, start=2):
+                node_uuid = self._csv_to_optional_str(row.get("uuid"))
+                node_type = (row.get("node_type") or "").strip().lower()
+                name = self._csv_to_optional_str(row.get("name")) or "Sin nombre"
+                parent_uuid = self._csv_to_optional_str(row.get("parent_uuid"))
+
+                if not node_uuid:
+                    node_uuid = self._generate_uuid()
+                    self.warnings.append(
+                        f"Línea {line_number}: nodo sin UUID. Se generó {node_uuid}."
+                    )
+
+                if node_uuid in self.nodes:
+                    self.warnings.append(
+                        f"Línea {line_number}: UUID duplicado {node_uuid}. Nodo omitido."
+                    )
+                    continue
+
+                size = self._csv_to_optional_float(row.get("size")) or 1.0
+                expanded = self._csv_to_bool(row.get("expanded"), default=True)
+
+                if node_type in {"group", "spacegroup"}:
+                    node = SpaceGroup(
+                        uuid=node_uuid,
+                        name=name,
+                        parent_uuid=parent_uuid,
+                        size=size,
+                        expanded=expanded,
+                        default_ventilated=self._csv_to_bool(row.get("default_ventilated"), default=False),
+                        opening_time_override=self._csv_to_optional_str(row.get("opening_time_override")),
+                        closing_time_override=self._csv_to_optional_str(row.get("closing_time_override")),
+                    )
+
+                elif node_type == "space":
+                    node = Space(
+                        uuid=node_uuid,
+                        name=name,
+                        parent_uuid=parent_uuid,
+                        size=size,
+                        capacity=self._csv_to_optional_int(row.get("capacity")),
+                        space_type_uuid=self._csv_to_optional_str(row.get("space_type_uuid")),
+                        ventilated=self._csv_to_bool(row.get("ventilated"), default=False),
+                        opening_time_override=self._csv_to_optional_str(row.get("opening_time_override")),
+                        closing_time_override=self._csv_to_optional_str(row.get("closing_time_override")),
+                        position_x=self._csv_to_optional_float(row.get("position_x")) or 0.0,
+                        position_y=self._csv_to_optional_float(row.get("position_y")) or 0.0,
+                    )
+
+                elif node_type == "career":
+                    node = Career(
+                        uuid=node_uuid,
+                        name=name,
+                        parent_uuid=parent_uuid,
+                        size=size,
+                        expanded=expanded,
+                        students_by_year=self._csv_to_optional_int(row.get("students_by_year")),
+                        default_attendance_rate=self._csv_to_optional_float(row.get("default_attendance_rate")),
+                        mean_age=self._csv_to_optional_float(row.get("mean_age")),
+                        std_age=self._csv_to_optional_float(row.get("std_age")),
+                        sex_ratio=self._csv_to_optional_float(row.get("sex_ratio")),
+                    )
+
+                elif node_type == "course":
+                    node = Course(
+                        uuid=node_uuid,
+                        name=name,
+                        parent_uuid=parent_uuid,
+                        size=size,
+                        expanded=expanded,
+                        career_uuid=self._csv_to_optional_str(row.get("career_uuid")) or parent_uuid,
+                        number_of_students=self._csv_to_optional_int(row.get("number_of_students")),
+                        attendance_rate=self._csv_to_optional_float(row.get("attendance_rate")),
+                        mean_age=self._csv_to_optional_float(row.get("mean_age")),
+                        std_age=self._csv_to_optional_float(row.get("std_age")),
+                        sex_ratio=self._csv_to_optional_float(row.get("sex_ratio")),
+                    )
+
+                elif node_type == "coursegroup":
+                    node = CourseGroup(
+                        uuid=node_uuid,
+                        name=name,
+                        parent_uuid=parent_uuid,
+                        size=size,
+                        expanded=expanded,
+                        course_uuid=self._csv_to_optional_str(row.get("course_uuid")) or parent_uuid,
+                        number_of_students=self._csv_to_optional_int(row.get("number_of_students")),
+                        attendance_rate=self._csv_to_optional_float(row.get("attendance_rate")),
+                        mean_age=self._csv_to_optional_float(row.get("mean_age")),
+                        std_age=self._csv_to_optional_float(row.get("std_age")),
+                        sex_ratio=self._csv_to_optional_float(row.get("sex_ratio")),
+                    )
+
+                else:
+                    self.warnings.append(
+                        f"Línea {line_number}: node_type inválido '{node_type}'. Nodo omitido."
+                    )
+                    continue
+
+                self.nodes[node.uuid] = node
+
+    def _rebuild_parent_child_links(self) -> None:
+        for node in self.nodes.values():
+            if isinstance(node, ContainerNode):
+                node.children_uuids.clear()
+
+        for node_uuid, node in list(self.nodes.items()):
+            if isinstance(node, Root):
+                continue
+
+            parent_uuid = node.parent_uuid or self.root_uuid
+
+            if parent_uuid not in self.nodes:
+                self.warnings.append(
+                    f"Nodo '{node.name}' tenía padre inexistente {parent_uuid}. Se conecta al root."
+                )
+                parent_uuid = self.root_uuid
+
+            parent = self.nodes[parent_uuid]
+
+            if not isinstance(parent, ContainerNode):
+                self.warnings.append(
+                    f"Nodo '{node.name}' tenía padre no contenedor. Se conecta al root."
+                )
+                parent_uuid = self.root_uuid
+                parent = self.nodes[parent_uuid]
+
+            if not self._can_parent_accept_child(parent, node):
+                self.warnings.append(
+                    f"Nodo '{node.name}' tenía padre incompatible. Se conecta al root."
+                )
+                parent_uuid = self.root_uuid
+                parent = self.nodes[parent_uuid]
+
+            node.parent_uuid = parent_uuid
+            parent.children_uuids.append(node_uuid)
+    
+    def _load_schedules_csv(self, path: Path) -> None:
+        with path.open("r", encoding="utf-8", newline="") as f:
+            reader = csv.DictReader(f)
+
+            for line_number, row in enumerate(reader, start=2):
+                block_uuid = self._csv_to_optional_str(row.get("uuid")) or self._generate_schedule_block_uuid()
+                owner_uuid = self._csv_to_optional_str(row.get("owner_uuid"))
+                schedule_type = self._csv_to_optional_str(row.get("schedule_type"))
+
+                if not owner_uuid or owner_uuid not in self.nodes:
+                    self.warnings.append(
+                        f"Línea {line_number}: horario con owner_uuid inválido. Se omite."
+                    )
+                    continue
+
+                block = ScheduleBlock(
+                    uuid=block_uuid,
+                    day_of_week=self._csv_to_optional_str(row.get("day_of_week")) or "monday",
+                    start_time=self._csv_to_optional_str(row.get("start_time")) or "08:00",
+                    end_time=self._csv_to_optional_str(row.get("end_time")) or "08:30",
+                    space_uuid=self._csv_to_optional_str(row.get("space_uuid")),
+                )
+
+                owner = self.nodes[owner_uuid]
+
+                if schedule_type == "course_base" and isinstance(owner, Course):
+                    owner.base_schedule.append(block)
+
+                elif schedule_type == "coursegroup_override" and isinstance(owner, CourseGroup):
+                    owner.schedule_overrides.append(block)
+
+                else:
+                    self.warnings.append(
+                        f"Línea {line_number}: tipo de horario incompatible con el nodo propietario."
+                    )
+
+        for node in self.nodes.values():
+            if isinstance(node, Course):
+                node.base_schedule = self._sort_schedule_blocks(node.base_schedule)
+
+            elif isinstance(node, CourseGroup):
+                node.schedule_overrides = self._sort_schedule_blocks(node.schedule_overrides)
 
     # -------------------------
     # Guardado en CSV
@@ -1154,6 +1423,152 @@ class Faculty:
                     errors.append(f"El espacio '{node.name}' tiene una capacidad inválida.")
 
         return errors
+    
+    def save_to_folder(self, folder_path: str | Path) -> None:
+        folder_path = Path(folder_path)
+        folder_path.mkdir(parents=True, exist_ok=True)
+
+        self._save_faculty_config(folder_path / "faculty_config.json")
+        self._save_nodes_csv(folder_path / "nodes.csv")
+        self._save_schedules_csv(folder_path / "schedules.csv")
+
+    def _save_faculty_config(self, path: Path) -> None:
+        root = self.get_root()
+
+        data = {
+            "root_uuid": root.uuid,
+            "name": root.name,
+            "opening_time": root.opening_time,
+            "closing_time": root.closing_time,
+            "schedule_slot_minutes": root.schedule_slot_minutes,
+            "default_ventilated": root.default_ventilated,
+            "calendar_days": root.calendar_days,
+        }
+
+        with path.open("w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+
+    def _save_nodes_csv(self, path: Path) -> None:
+        fieldnames = [
+            "uuid",
+            "node_type",
+            "name",
+            "parent_uuid",
+            "size",
+            "expanded",
+            "capacity",
+            "space_type_uuid",
+            "ventilated",
+            "opening_time_override",
+            "closing_time_override",
+            "position_x",
+            "position_y",
+            "students_by_year",
+            "default_attendance_rate",
+            "number_of_students",
+            "attendance_rate",
+            "mean_age",
+            "std_age",
+            "sex_ratio",
+            "career_uuid",
+            "course_uuid",
+        ]
+
+        rows = []
+
+        for node in self._iter_nodes_for_saving():
+            if isinstance(node, Root):
+                continue
+
+            if isinstance(node, SpaceGroup):
+                node_type = "spacegroup"
+            elif isinstance(node, Space):
+                node_type = "space"
+            elif isinstance(node, Career):
+                node_type = "career"
+            elif isinstance(node, Course):
+                node_type = "course"
+            elif isinstance(node, CourseGroup):
+                node_type = "coursegroup"
+            else:
+                continue
+
+            rows.append({
+                "uuid": node.uuid,
+                "node_type": node_type,
+                "name": node.name,
+                "parent_uuid": node.parent_uuid or "",
+                "size": self._value_to_csv(getattr(node, "size", None)),
+                "expanded": self._value_to_csv(getattr(node, "expanded", None)),
+
+                "capacity": self._value_to_csv(getattr(node, "capacity", None)),
+                "space_type_uuid": self._value_to_csv(getattr(node, "space_type_uuid", None)),
+                "ventilated": self._value_to_csv(getattr(node, "ventilated", None)),
+                "opening_time_override": self._value_to_csv(getattr(node, "opening_time_override", None)),
+                "closing_time_override": self._value_to_csv(getattr(node, "closing_time_override", None)),
+                "position_x": self._value_to_csv(getattr(node, "position_x", None)),
+                "position_y": self._value_to_csv(getattr(node, "position_y", None)),
+
+                "students_by_year": self._value_to_csv(getattr(node, "students_by_year", None)),
+                "default_attendance_rate": self._value_to_csv(getattr(node, "default_attendance_rate", None)),
+
+                "number_of_students": self._value_to_csv(getattr(node, "number_of_students", None)),
+                "attendance_rate": self._value_to_csv(getattr(node, "attendance_rate", None)),
+                "mean_age": self._value_to_csv(getattr(node, "mean_age", None)),
+                "std_age": self._value_to_csv(getattr(node, "std_age", None)),
+                "sex_ratio": self._value_to_csv(getattr(node, "sex_ratio", None)),
+
+                "career_uuid": self._value_to_csv(getattr(node, "career_uuid", None)),
+                "course_uuid": self._value_to_csv(getattr(node, "course_uuid", None)),
+            })
+
+        with path.open("w", encoding="utf-8", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(rows)
+
+    def _save_schedules_csv(self, path: Path) -> None:
+        fieldnames = [
+            "uuid",
+            "owner_uuid",
+            "schedule_type",
+            "day_of_week",
+            "start_time",
+            "end_time",
+            "space_uuid",
+        ]
+
+        rows = []
+
+        for node in self._iter_nodes_for_saving():
+            if isinstance(node, Course):
+                for block in node.base_schedule:
+                    rows.append({
+                        "uuid": block.uuid,
+                        "owner_uuid": node.uuid,
+                        "schedule_type": "course_base",
+                        "day_of_week": block.day_of_week,
+                        "start_time": block.start_time,
+                        "end_time": block.end_time,
+                        "space_uuid": block.space_uuid or "",
+                    })
+
+            elif isinstance(node, CourseGroup):
+                for block in node.schedule_overrides:
+                    rows.append({
+                        "uuid": block.uuid,
+                        "owner_uuid": node.uuid,
+                        "schedule_type": "coursegroup_override",
+                        "day_of_week": block.day_of_week,
+                        "start_time": block.start_time,
+                        "end_time": block.end_time,
+                        "space_uuid": block.space_uuid or "",
+                    })
+
+        with path.open("w", encoding="utf-8", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(rows)
 
     # -------------------------
     # Debug / inspección

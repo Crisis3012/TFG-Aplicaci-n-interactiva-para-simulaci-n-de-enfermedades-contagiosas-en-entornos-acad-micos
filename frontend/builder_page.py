@@ -1,4 +1,7 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QSplitter, QFrame, QHBoxLayout, QPushButton
+from PySide6.QtWidgets import (
+    QWidget, QVBoxLayout, QSplitter, QFrame, QHBoxLayout,
+    QPushButton, QMessageBox
+)
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QShortcut, QKeySequence
 
@@ -35,14 +38,48 @@ class BuilderPage(QWidget):
         self.tree_panel = BuilderTreePanel()
         self.properties_panel = BuilderPropertiesPanel()
 
-        # Centro con botón de modo + grafo
+        # Centro con barra superior + grafo
         self.center_panel = QFrame()
         self.center_layout = QVBoxLayout(self.center_panel)
         self.center_layout.setContentsMargins(6, 6, 6, 6)
         self.center_layout.setSpacing(6)
 
         top_bar = QHBoxLayout()
-        top_bar.addStretch()
+        top_bar.setSpacing(8)
+
+        self.back_button = QPushButton("Volver")
+        self.back_button.setFixedHeight(34)
+        self.back_button.setStyleSheet("""
+            QPushButton {
+                background-color: rgba(90, 98, 108, 180);
+                color: white;
+                border: none;
+                border-radius: 10px;
+                padding: 6px 12px;
+                font-size: 13px;
+            }
+            QPushButton:hover {
+                background-color: rgba(110, 118, 128, 210);
+            }
+        """)
+        self.back_button.clicked.connect(lambda: self.stacked_widget.setCurrentIndex(0))
+
+        self.save_button = QPushButton("Guardar facultad")
+        self.save_button.setFixedHeight(34)
+        self.save_button.setStyleSheet("""
+            QPushButton {
+                background-color: rgba(67, 160, 71, 180);
+                color: white;
+                border: none;
+                border-radius: 10px;
+                padding: 6px 12px;
+                font-size: 13px;
+                font-weight: 600;
+            }
+            QPushButton:hover {
+                background-color: rgba(56, 142, 60, 220);
+            }
+        """)
 
         self.mode_button = QPushButton()
         self.mode_button.setFixedHeight(34)
@@ -60,6 +97,9 @@ class BuilderPage(QWidget):
             }
         """)
 
+        top_bar.addWidget(self.back_button)
+        top_bar.addWidget(self.save_button)
+        top_bar.addStretch()
         top_bar.addWidget(self.mode_button)
 
         self.graph_view = GraphView()
@@ -97,8 +137,9 @@ class BuilderPage(QWidget):
         self.graph_view.node_deselected.connect(self.controller.clear_selection)
         self.graph_view.node_double_clicked.connect(self.controller.toggle_group)
 
-        # Botón modo
+        # Botones superiores
         self.mode_button.clicked.connect(self.controller.toggle_builder_mode)
+        self.save_button.clicked.connect(self.controller.save_active_faculty)
 
         # Panel derecho
         self.properties_panel.properties_changed.connect(
@@ -142,7 +183,24 @@ class BuilderPage(QWidget):
         self.properties_panel.clear()
 
     def show_error(self, message):
-        print(f"[UI error] {message}")
+        QMessageBox.critical(self, "Error", str(message))
+
+    def show_info(self, message):
+        QMessageBox.information(self, "Información", str(message))
+
+    def apply_current_properties(self):
+        """
+        Fuerza a aplicar los cambios visibles del panel derecho antes de guardar.
+
+        Esto hace que si el usuario modifica el nodo seleccionado y pulsa
+        directamente 'Guardar facultad', esos cambios también se vuelquen
+        al modelo antes de escribir los archivos.
+        """
+        if self.current_node is None:
+            return
+
+        if hasattr(self.properties_panel, "apply_current_changes"):
+            self.properties_panel.apply_current_changes()
 
     # ============================================================
     # Acciones auxiliares

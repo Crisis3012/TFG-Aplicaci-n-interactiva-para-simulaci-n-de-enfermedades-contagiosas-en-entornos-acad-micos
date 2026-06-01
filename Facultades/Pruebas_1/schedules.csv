@@ -1,0 +1,9 @@
+uuid,owner_uuid,schedule_type,day_of_week,start_time,end_time,space_uuid
+c3320aef-bdec-4c17-b9dc-d027adcd22ba,26cc0afb-4844-420c-9d6b-3f6da48d1d5e,course_base,monday,08:00,08:30,5cb6433c-05a5-4955-a8e6-bf9b2962b4df
+d496684e-51f6-4898-83fc-3d8adf807756,26cc0afb-4844-420c-9d6b-3f6da48d1d5e,course_base,monday,08:30,09:00,5cb6433c-05a5-4955-a8e6-bf9b2962b4df
+5de2ea51-9a30-402e-9993-e626cb804321,26cc0afb-4844-420c-9d6b-3f6da48d1d5e,course_base,monday,09:00,09:30,5cb6433c-05a5-4955-a8e6-bf9b2962b4df
+ef460689-ebb0-450a-8ed9-04c92923d22a,26cc0afb-4844-420c-9d6b-3f6da48d1d5e,course_base,monday,09:30,10:00,5cb6433c-05a5-4955-a8e6-bf9b2962b4df
+e80a6a6e-e8cf-4887-a85b-f97209cae3a8,26cc0afb-4844-420c-9d6b-3f6da48d1d5e,course_base,monday,10:00,10:30,042fe007-c088-4f72-9960-cc05e7cd69ed
+0b77aefa-923e-4caf-873b-91c667c1eb12,26cc0afb-4844-420c-9d6b-3f6da48d1d5e,course_base,monday,10:30,11:00,042fe007-c088-4f72-9960-cc05e7cd69ed
+f2c19ae6-1048-42ef-83b1-fd2ea87ca1c0,26cc0afb-4844-420c-9d6b-3f6da48d1d5e,course_base,monday,11:00,11:30,042fe007-c088-4f72-9960-cc05e7cd69ed
+0262fe0d-00af-4fee-8416-1ba7b23d7c0a,26cc0afb-4844-420c-9d6b-3f6da48d1d5e,course_base,monday,11:30,12:00,042fe007-c088-4f72-9960-cc05e7cd69ed

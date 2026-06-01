@@ -2,16 +2,27 @@ from __future__ import annotations
 
 from typing import Optional, Any
 
+from pathlib import Path
 from backend.faculty import Faculty
+from backend.faculty_project_manager import FacultyProjectManager
 
 
 class BuilderController:
-    def __init__(self, faculty: Faculty, ui: Optional[Any] = None):
+    def __init__(
+        self,
+        faculty: Faculty,
+        ui: Optional[Any] = None,
+        project_manager: Optional[FacultyProjectManager] = None,
+        active_faculty_name: Optional[str] = None,
+    ):
         self.faculty = faculty
         self.ui = ui
         self.selected_node_uuid: Optional[str] = None
-        self.builder_mode: str = "space"   # "space" o "agent"
+        self.builder_mode: str = "space"
 
+        self.project_manager = project_manager or FacultyProjectManager()
+        self.active_faculty_name = active_faculty_name
+        
     def attach_ui(self, ui: Any) -> None:
         self.ui = ui
 
@@ -214,6 +225,79 @@ class BuilderController:
     def get_children_for_current_mode(self, node_uuid: str):
         children = self.faculty.get_children(node_uuid)
         return [child for child in children if self._node_belongs_to_active_builder(child)]
+    
+    def load_active_faculty(self) -> None:
+        faculty, faculty_name = self.project_manager.load_active_or_create_default()
+
+        self.faculty = faculty
+        self.active_faculty_name = faculty_name
+        self.selected_node_uuid = None
+
+        self.refresh_all()
+
+
+    def get_faculty_names(self) -> list[str]:
+        return self.project_manager.list_faculties()
+
+
+    def get_active_faculty_name(self) -> Optional[str]:
+        return self.active_faculty_name
+
+
+    def select_faculty(self, faculty_name: str) -> None:
+        if not faculty_name:
+            return
+
+        try:
+            faculty = self.project_manager.load_faculty(faculty_name)
+        except Exception as exc:
+            self._show_error(f"No se ha podido cargar la facultad '{faculty_name}': {exc}")
+            return
+
+        self.faculty = faculty
+        self.active_faculty_name = faculty_name
+        self.selected_node_uuid = None
+
+        folder_path = self.project_manager.get_faculty_path(faculty_name)
+        self.project_manager.set_active_faculty_path(folder_path)
+
+        self.refresh_all()
+
+
+    def create_new_faculty_project(self, faculty_name: str) -> None:
+        try:
+            folder_path = self.project_manager.create_faculty(faculty_name)
+        except Exception as exc:
+            self._show_error(str(exc))
+            return
+
+        self.faculty = Faculty.load_from_folder(folder_path)
+        self.active_faculty_name = faculty_name
+        self.selected_node_uuid = None
+
+        self.refresh_all()
+
+
+    def save_active_faculty(self) -> None:
+        if not self.active_faculty_name:
+            self._show_error("No hay ninguna facultad activa.")
+            return
+
+        # Fuerza aplicar los cambios del nodo seleccionado antes de guardar.
+        if self.ui is not None and hasattr(self.ui, "apply_current_properties"):
+            self.ui.apply_current_properties()
+
+        try:
+            self.project_manager.save_faculty(
+                faculty=self.faculty,
+                faculty_name=self.active_faculty_name,
+            )
+        except Exception as exc:
+            self._show_error(f"No se ha podido guardar la facultad: {exc}")
+            return
+
+        if self.ui is not None and hasattr(self.ui, "show_info"):
+            self.ui.show_info("Facultad guardada correctamente.")
 
     # -------------------------
     # SELECCIÓN
@@ -605,7 +689,7 @@ class BuilderController:
 
     def _is_expandable_container(self, node: Any) -> bool:
         return self._get_node_type(node) in {
-            "group", "spacegroup", "career", "course", "coursegroup"
+            "group", "spacegroup", "career", "course"
         }
 
     def _show_error(self, message: str) -> None:

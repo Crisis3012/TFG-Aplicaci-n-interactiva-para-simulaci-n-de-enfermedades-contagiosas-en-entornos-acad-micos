@@ -34,3 +34,11 @@ Cargar facultades a memoria:
         - Si no hay: Se crea el nodo con los datos de la fila y se conecta a "Pasillo"
         - Si hay y no existe: Se crea un nodo grupo que se conecta a "Pasillo" y el nodo de la linea se conecta al grupo creados
         - Si hay y existe: Se crea el nodo con los datos de la fila y se conecta al grupo existente
+
+
+BUILDER CHANGES TO APPLY:
+    - Cambiar color letra builder tree
+    - Poder escoger colores de las bolas
+    - Cambiar el color del borde del grupo si estan expandidos o contraidos
+    - Que al pulsar enter se guarde el estado de la entidad y se pase a la siguiente casilla de escritura
+    - Hacer que los errores en vez de en la consola se muestren como avisos en la pantalla del biulder

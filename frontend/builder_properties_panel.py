@@ -209,12 +209,12 @@ class BuilderPropertiesPanel(QFrame):
         self._add_float_text("sex_ratio", "Sex ratio", getattr(node, "sex_ratio", None))
 
         self._add_schedule_table(
-            key="schedule_override_blocks",
-            label_text="Horario del grupo",
+            key="base_schedule_blocks",
+            label_text="Horario del curso",
             form_options=form_options,
-            existing_blocks=getattr(node, "schedule_overrides", []),
-            table_mode="override",
-            inherited_blocks=form_options.get("course_base_schedule", []),
+            existing_blocks=getattr(node, "base_schedule", []),
+            table_mode="base",
+            inherited_blocks=[],
         )
 
     def _build_course_group_form(self, node, form_options):
@@ -341,7 +341,7 @@ class BuilderPropertiesPanel(QFrame):
         label.setFont(QFont("Arial", 11, QFont.Weight.Bold))
         legend = QLabel(
             "Azul = horario base asignado" if table_mode == "base"
-            else "Morado = override asignado"
+            else "Azul = heredado | Morado = modificación del grupo"
         )
         legend.setStyleSheet("""
             QLabel {
@@ -582,6 +582,9 @@ class BuilderPropertiesPanel(QFrame):
     # ============================================================
     # Emisión de cambios
     # ============================================================
+
+    def apply_current_changes(self):
+        self._emit_properties_changed()
 
     def _emit_properties_changed(self):
         if self.current_node is None:

@@ -1,0 +1,3 @@
+uuid,node_type,name,parent_uuid,size,expanded,capacity,space_type_uuid,ventilated,opening_time_override,closing_time_override,position_x,position_y,students_by_year,default_attendance_rate,number_of_students,attendance_rate,mean_age,std_age,sex_ratio,career_uuid,course_uuid
+871c5d1d-2963-4c94-8b21-b357b4a15dbf,space,A,50b5116e-a7bf-4295-b4ac-7923e2aca3c4,1.0,,,,0,,,0.0,0.0,,,,,,,,,
+dffed747-b520-4c67-924f-3de8a0227c9d,space,B,50b5116e-a7bf-4295-b4ac-7923e2aca3c4,1.0,,,,0,,,0.0,0.0,,,,,,,,,
