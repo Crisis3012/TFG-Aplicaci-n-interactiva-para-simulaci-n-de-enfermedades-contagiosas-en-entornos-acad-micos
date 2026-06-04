@@ -30,3 +30,6 @@
 
 - Versión 0.1.2:
     Remodulación del layout de los nodos para construir escenarios con más claridad, también se ha añadido un botón de reordenación para cambiar el layout completo de los nodos a mitad de la sesión. Tambien se ha cambiado el color de las letras del tree panel para mayor legibilidad.
+
+- Versión 0.1.3:
+    Solo se ha arreglado el botón de salir de la app, ahora siq ue cierra la ventana.

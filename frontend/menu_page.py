@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
-    QLabel, QComboBox, QInputDialog
+    QLabel, QComboBox, QInputDialog, QApplication
 )
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
@@ -63,7 +63,7 @@ class MenuPage(QWidget):
 
         self.btn_builder.clicked.connect(self.open_builder)
         self.btn_simular.clicked.connect(self.open_simulation)
-        self.btn_salir.clicked.connect(self.window().close)
+        self.btn_salir.clicked.connect(QApplication.instance().quit)
 
         center_layout.addWidget(title)
         center_layout.addSpacing(25)
