@@ -25,11 +25,23 @@ MAIN_STYLE = """
         background-color: #4e5d94;
     }
 
-    QLineEdit, QSpinBox, QComboBox, QTreeWidget {
+    QLineEdit, QSpinBox, QComboBox {
         background-color: #f4f6f7;
         color: #1f2933;
         border-radius: 5px;
         padding: 4px;
+    }
+
+    QTreeWidget {
+        background-color: #f4f6f7;
+        color: white;
+        border-radius: 5px;
+        padding: 4px;
+    }
+
+    QTreeWidget::item:selected {
+        background-color: #7289da;
+        color: white;
     }
 
     QSlider {

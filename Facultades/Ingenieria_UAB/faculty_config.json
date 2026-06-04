@@ -1,0 +1,15 @@
+{
+    "root_uuid": "6ed72aab-42fb-4687-98d0-3ac798ee13b5",
+    "name": "Ingenieria_UAB",
+    "opening_time": "08:00",
+    "closing_time": "21:00",
+    "schedule_slot_minutes": 30,
+    "default_ventilated": false,
+    "calendar_days": [
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday"
+    ]
+}

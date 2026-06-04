@@ -81,6 +81,23 @@ class BuilderPage(QWidget):
             }
         """)
 
+        self.reset_layout_button = QPushButton("Reordenar grafo")
+        self.reset_layout_button.setFixedHeight(34)
+        self.reset_layout_button.setStyleSheet("""
+            QPushButton {
+                background-color: rgba(255, 167, 38, 180);
+                color: white;
+                border: none;
+                border-radius: 10px;
+                padding: 6px 12px;
+                font-size: 13px;
+                font-weight: 600;
+            }
+            QPushButton:hover {
+                background-color: rgba(251, 140, 0, 220);
+            }
+        """)
+
         self.mode_button = QPushButton()
         self.mode_button.setFixedHeight(34)
         self.mode_button.setStyleSheet("""
@@ -99,6 +116,7 @@ class BuilderPage(QWidget):
 
         top_bar.addWidget(self.back_button)
         top_bar.addWidget(self.save_button)
+        top_bar.addWidget(self.reset_layout_button)
         top_bar.addStretch()
         top_bar.addWidget(self.mode_button)
 
@@ -140,6 +158,7 @@ class BuilderPage(QWidget):
         # Botones superiores
         self.mode_button.clicked.connect(self.controller.toggle_builder_mode)
         self.save_button.clicked.connect(self.controller.save_active_faculty)
+        self.reset_layout_button.clicked.connect(self._reset_graph_layout)
 
         # Panel derecho
         self.properties_panel.properties_changed.connect(
@@ -209,6 +228,10 @@ class BuilderPage(QWidget):
     def _toggle_current_group(self):
         if self.current_node is not None:
             self.controller.toggle_group(self.current_node.uuid)
+
+    def _reset_graph_layout(self):
+        self.graph_view.reset_layout()
+        self.controller.refresh_all()
 
     def forget_graph_nodes(self, node_uuids: list[str]) -> None:
         self.graph_view.forget_node_positions(node_uuids)
