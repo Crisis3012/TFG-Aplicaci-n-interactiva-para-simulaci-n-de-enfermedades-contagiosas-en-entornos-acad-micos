@@ -207,10 +207,10 @@ class Faculty:
         self.nodes[self.root_uuid] = root
 
         self.space_types: List[SpaceType] = [
-            SpaceType(uuid="classroom", name="Classroom"),
-            SpaceType(uuid="lab", name="Laboratory"),
-            SpaceType(uuid="office", name="Office"),
-            SpaceType(uuid="corridor", name="Corridor", is_transit_type=True),
+            SpaceType(uuid="classroom", name="Clase"),
+            SpaceType(uuid="lab", name="Laboratorio"),
+            SpaceType(uuid="corridor", name="Pasillo", is_transit_type=True),
+            SpaceType(uuid="common_space", name="Sala común", is_recreation_type=True),
         ]
 
     # -------------------------
@@ -441,8 +441,7 @@ class Faculty:
         if name is not None:
             node.name = name.strip()
 
-        if capacity is not None:
-            node.capacity = capacity
+        node.capacity = capacity
 
         node.space_type_uuid = space_type_uuid
 

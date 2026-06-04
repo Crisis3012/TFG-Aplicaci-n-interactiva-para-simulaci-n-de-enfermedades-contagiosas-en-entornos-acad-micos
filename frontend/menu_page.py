@@ -7,11 +7,17 @@ from PySide6.QtGui import QFont
 
 
 class MenuPage(QWidget):
-    def __init__(self, stacked_widget, builder_controller):
+    def __init__(
+        self,
+        stacked_widget,
+        builder_controller,
+        simulation_page_index: int = 2,
+    ):
         super().__init__()
 
         self.stacked_widget = stacked_widget
         self.builder_controller = builder_controller
+        self.simulation_page_index = simulation_page_index
         self._updating_faculty_selector = False
 
         main_layout = QVBoxLayout()
@@ -42,23 +48,29 @@ class MenuPage(QWidget):
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         title.setFont(QFont("Arial", 30, QFont.Weight.Bold))
 
-        btn_builder = QPushButton("Builder")
-        btn_simular = QPushButton("Simular")
-        btn_visualizar = QPushButton("Visualizar")
-        btn_salir = QPushButton("Salir")
+        self.btn_builder = QPushButton("Builder")
+        self.btn_simular = QPushButton("Simular")
+        self.btn_visualizar = QPushButton("Visualizar")
+        self.btn_salir = QPushButton("Salir")
 
-        for button in [btn_builder, btn_simular, btn_visualizar, btn_salir]:
+        for button in [
+            self.btn_builder,
+            self.btn_simular,
+            self.btn_visualizar,
+            self.btn_salir,
+        ]:
             button.setFixedSize(220, 45)
 
-        btn_builder.clicked.connect(self.open_builder)
-        btn_salir.clicked.connect(self.window().close)
+        self.btn_builder.clicked.connect(self.open_builder)
+        self.btn_simular.clicked.connect(self.open_simulation)
+        self.btn_salir.clicked.connect(self.window().close)
 
         center_layout.addWidget(title)
         center_layout.addSpacing(25)
-        center_layout.addWidget(btn_builder, alignment=Qt.AlignmentFlag.AlignCenter)
-        center_layout.addWidget(btn_simular, alignment=Qt.AlignmentFlag.AlignCenter)
-        center_layout.addWidget(btn_visualizar, alignment=Qt.AlignmentFlag.AlignCenter)
-        center_layout.addWidget(btn_salir, alignment=Qt.AlignmentFlag.AlignCenter)
+        center_layout.addWidget(self.btn_builder, alignment=Qt.AlignmentFlag.AlignCenter)
+        center_layout.addWidget(self.btn_simular, alignment=Qt.AlignmentFlag.AlignCenter)
+        center_layout.addWidget(self.btn_visualizar, alignment=Qt.AlignmentFlag.AlignCenter)
+        center_layout.addWidget(self.btn_salir, alignment=Qt.AlignmentFlag.AlignCenter)
 
         main_layout.addLayout(top_layout)
         main_layout.addStretch()
@@ -72,6 +84,14 @@ class MenuPage(QWidget):
     def open_builder(self):
         self.stacked_widget.setCurrentIndex(1)
         self.builder_controller.load_builder()
+
+    def open_simulation(self):
+        simulation_page = self.stacked_widget.widget(self.simulation_page_index)
+
+        if hasattr(simulation_page, "load_page"):
+            simulation_page.load_page()
+
+        self.stacked_widget.setCurrentIndex(self.simulation_page_index)
 
     def refresh_faculty_selector(self):
         self._updating_faculty_selector = True
@@ -90,7 +110,6 @@ class MenuPage(QWidget):
 
         self._updating_faculty_selector = False
 
-
     def _on_faculty_selected(self, faculty_name: str):
         if self._updating_faculty_selector:
             return
@@ -99,7 +118,6 @@ class MenuPage(QWidget):
             return
 
         self.builder_controller.select_faculty(faculty_name)
-
 
     def _create_new_faculty(self):
         name, ok = QInputDialog.getText(
@@ -114,13 +132,10 @@ class MenuPage(QWidget):
         name = name.strip()
 
         if not name:
-            self.builder_controller._show_error("El nombre de la facultad no puede estar vacío.")
+            self.builder_controller._show_error(
+                "El nombre de la facultad no puede estar vacío."
+            )
             return
 
         self.builder_controller.create_new_faculty_project(name)
         self.refresh_faculty_selector()
-
-
-    def open_builder(self):
-        self.stacked_widget.setCurrentIndex(1)
-        self.builder_controller.load_builder()

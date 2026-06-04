@@ -2,7 +2,10 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout, QStackedWidget
 
 from frontend.menu_page import MenuPage
 from frontend.builder_page import BuilderPage
+from frontend.simulation_page import SimulationPage
 from frontend.styles import MAIN_STYLE
+
+from controller.simulation_controller import SimulationController
 
 
 class MainWindow(QWidget):
@@ -10,6 +13,9 @@ class MainWindow(QWidget):
         super().__init__()
 
         self.builder_controller = builder_controller
+        self.simulation_controller = SimulationController(
+            builder_controller=self.builder_controller
+        )
 
         self.setWindowTitle("TFG")
         self.resize(1200, 760)
@@ -19,6 +25,7 @@ class MainWindow(QWidget):
         self.menu_page = MenuPage(
             stacked_widget=self.stacked,
             builder_controller=self.builder_controller,
+            simulation_page_index=2,
         )
 
         self.builder_page = BuilderPage(
@@ -26,8 +33,14 @@ class MainWindow(QWidget):
             builder_controller=self.builder_controller,
         )
 
-        self.stacked.addWidget(self.menu_page)      # index 0
-        self.stacked.addWidget(self.builder_page)   # index 1
+        self.simulation_page = SimulationPage(
+            stacked_widget=self.stacked,
+            simulation_controller=self.simulation_controller,
+        )
+
+        self.stacked.addWidget(self.menu_page)        # index 0
+        self.stacked.addWidget(self.builder_page)     # index 1
+        self.stacked.addWidget(self.simulation_page)  # index 2
 
         self.menu_page.refresh_faculty_selector()
 

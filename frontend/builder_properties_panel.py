@@ -161,6 +161,13 @@ class BuilderPropertiesPanel(QFrame):
         self._add_text("name", "Nombre", node.name)
 
         self._add_optional_title()
+
+        self._add_number_text(
+            "capacity",
+            "Capacidad",
+            getattr(node, "capacity", None),
+        )
+
         self._add_combo_from_pairs_with_none(
             "space_type_uuid",
             "Tipo de espacio",
@@ -617,7 +624,7 @@ class BuilderPropertiesPanel(QFrame):
         if "schedule_slot_minutes" in values and values["schedule_slot_minutes"] is not None:
             values["schedule_slot_minutes"] = int(values["schedule_slot_minutes"])
 
-        for int_key in ("students_by_year", "number_of_students"):
+        for int_key in ("students_by_year", "number_of_students", "capacity"):
             if int_key in values and values[int_key] is not None:
                 values[int_key] = int(values[int_key])
 

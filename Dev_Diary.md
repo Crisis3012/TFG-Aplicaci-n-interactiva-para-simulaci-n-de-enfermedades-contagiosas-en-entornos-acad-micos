@@ -24,3 +24,6 @@
 
 - Versión 0.1.0:
     Builder funcional terminado. Ahora ya funcionan las funcionalidades añadidas en la última versión y se han añadido un método de guardado, selección y creado de facultades nuevas. Con esto cerramos las funcionalidades de la primera parte del programa y tenemos una base cerrada y totalmente funcional para empezar con la parte de la simulación.
+
+- Versión 0.1.1:
+    Se ha terminado prácticamente la simulación. Simplemente se han seguido los acuerdos establecidos y se ha enlazado con la UI de manera muy básica. Como posibles mejoras quedan revisiones de algunas tablas internas y de los calculos efectuados con ellas, así como la introducción de redes sociales funcionales dentro de los alumnos de la facultad. Para terminar con la versión 0.1.x solo queda pulir la pantalla de simulación con parámetros introducibles que tengan más sentido.

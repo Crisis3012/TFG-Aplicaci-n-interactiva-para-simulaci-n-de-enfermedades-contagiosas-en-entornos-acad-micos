@@ -548,6 +548,7 @@ class BuilderController:
             self.faculty.update_space_properties(
                 node_uuid=node.uuid,
                 name=values.get("name"),
+                capacity=values.get("capacity"),
                 space_type_uuid=values.get("space_type_uuid"),
                 ventilated=values.get("ventilated"),
                 opening_time_override=values.get("opening_time_override"),
