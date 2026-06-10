@@ -32,4 +32,7 @@
     Remodulación del layout de los nodos para construir escenarios con más claridad, también se ha añadido un botón de reordenación para cambiar el layout completo de los nodos a mitad de la sesión. Tambien se ha cambiado el color de las letras del tree panel para mayor legibilidad.
 
 - Versión 0.1.3:
-    Solo se ha arreglado el botón de salir de la app, ahora siq ue cierra la ventana.
+    Solo se ha arreglado el botón de salir de la app, ahora si que cierra la ventana.
+
+- Versión 0.1.4:
+    Se ha cambiado el comportamiento de la creación de clases para que si estas en una clase puedas crear otra y que esta se vuelva hermana en vez de crearse en el root como se hacía antes. Tambien se ha hecho la estructura de la FIUAB casi entera.

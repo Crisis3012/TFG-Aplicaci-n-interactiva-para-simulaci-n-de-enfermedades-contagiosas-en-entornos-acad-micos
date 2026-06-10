@@ -638,8 +638,13 @@ class BuilderController:
         if selected_node is None:
             return None
 
-        if self._get_node_type(selected_node) in {"root", "group", "spacegroup"}:
+        node_type = self._get_node_type(selected_node)
+
+        if node_type in {"root", "group", "spacegroup"}:
             return selected_node.uuid
+
+        if node_type == "space":
+            return selected_node.parent_uuid
 
         return None
 
