@@ -125,6 +125,7 @@ class BuilderController:
                 "name": node.name,
                 "type": node_type,
                 "size": getattr(node, "size", 100),
+                "expanded": getattr(node, "expanded", None),
             })
 
         for node in visible_nodes:

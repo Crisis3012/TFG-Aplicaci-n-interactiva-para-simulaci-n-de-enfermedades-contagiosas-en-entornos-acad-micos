@@ -28,12 +28,19 @@ class GraphEdgeItem(QGraphicsLineItem):
 
 
 class BaseGraphNodeItem(QGraphicsObject):
-    def __init__(self, node_uuid: str, name: str, size: float = 100):
+    def __init__(
+        self,
+        node_uuid: str,
+        name: str,
+        size: float = 100,
+        expanded=None,
+    ):
         super().__init__()
 
         self.node_uuid = node_uuid
         self.name = name
         self.size = max(float(size), 90.0)
+        self.expanded = expanded
 
         self.connected_edges = []
 
@@ -46,6 +53,7 @@ class BaseGraphNodeItem(QGraphicsObject):
         self.setAcceptedMouseButtons(Qt.MouseButton.LeftButton)
 
         self.default_pen = QPen(QColor("#1f3a5f"), 3)
+        self.collapsed_pen = QPen(QColor("#f39c12"), 4)
         self.selected_pen = QPen(QColor("#e74c3c"), 4)
         self.text_pen = QPen(QColor("#111827"))
 
@@ -66,7 +74,13 @@ class BaseGraphNodeItem(QGraphicsObject):
         return super().itemChange(change, value)
 
     def _current_pen(self):
-        return self.selected_pen if self.isSelected() else self.default_pen
+        if self.isSelected():
+            return self.selected_pen
+
+        if self.expanded is False:
+            return self.collapsed_pen
+
+        return self.default_pen
 
     def _draw_centered_text(self, painter, rect: QRectF):
         painter.setPen(self.text_pen)
@@ -82,8 +96,8 @@ class BaseGraphNodeItem(QGraphicsObject):
 
 
 class RootNodeItem(BaseGraphNodeItem):
-    def __init__(self, node_uuid: str, name: str, size: float = 100):
-        super().__init__(node_uuid, name, size)
+    def __init__(self, node_uuid: str, name: str, size: float = 100, expanded=None):
+        super().__init__(node_uuid, name, size, expanded=expanded)
         self.width = self.size * 1.8
         self.height = self.size * 0.9
 
@@ -108,8 +122,15 @@ class RootNodeItem(BaseGraphNodeItem):
 
 
 class GroupNodeItem(BaseGraphNodeItem):
-    def __init__(self, node_uuid: str, name: str, size: float = 100, color: str = "#75d7e0"):
-        super().__init__(node_uuid, name, size)
+    def __init__(
+        self,
+        node_uuid: str,
+        name: str,
+        size: float = 100,
+        color: str = "#75d7e0",
+        expanded=None,
+    ):
+        super().__init__(node_uuid, name, size, expanded=expanded)
         self.diameter = self.size
         self.fill_color = color
 
@@ -134,8 +155,8 @@ class GroupNodeItem(BaseGraphNodeItem):
 
 
 class SpaceNodeItem(BaseGraphNodeItem):
-    def __init__(self, node_uuid: str, name: str, size: float = 100):
-        super().__init__(node_uuid, name, size)
+    def __init__(self, node_uuid: str, name: str, size: float = 100, expanded=None):
+        super().__init__(node_uuid, name, size, expanded=expanded)
         self.width = self.size * 1.7
         self.height = self.size * 0.85
 
@@ -159,25 +180,70 @@ class SpaceNodeItem(BaseGraphNodeItem):
         self._draw_centered_text(painter, rect)
 
 
-def create_graph_node_item(node_uuid: str, name: str, node_type: str, size: float = 100):
+def create_graph_node_item(
+    node_uuid: str,
+    name: str,
+    node_type: str,
+    size: float = 100,
+    expanded=None,
+):
     node_type = node_type.lower()
 
     if node_type == "root":
-        return RootNodeItem(node_uuid=node_uuid, name=name, size=size)
+        return RootNodeItem(
+            node_uuid=node_uuid,
+            name=name,
+            size=size,
+            expanded=expanded,
+        )
 
     if node_type in {"group", "spacegroup"}:
-        return GroupNodeItem(node_uuid=node_uuid, name=name, size=size, color="#75d7e0")
+        return GroupNodeItem(
+            node_uuid=node_uuid,
+            name=name,
+            size=size,
+            color="#75d7e0",
+            expanded=expanded,
+        )
 
     if node_type == "career":
-        return GroupNodeItem(node_uuid=node_uuid, name=name, size=size, color="#8bd17c")
+        return GroupNodeItem(
+            node_uuid=node_uuid,
+            name=name,
+            size=size,
+            color="#8bd17c",
+            expanded=expanded,
+        )
 
     if node_type == "course":
-        return GroupNodeItem(node_uuid=node_uuid, name=name, size=size, color="#f2c46d")
+        return GroupNodeItem(
+            node_uuid=node_uuid,
+            name=name,
+            size=size,
+            color="#f2c46d",
+            expanded=expanded,
+        )
 
     if node_type == "coursegroup":
-        return GroupNodeItem(node_uuid=node_uuid, name=name, size=size, color="#c6a4ff")
+        return GroupNodeItem(
+            node_uuid=node_uuid,
+            name=name,
+            size=size,
+            color="#c6a4ff",
+            expanded=expanded,
+        )
 
     if node_type == "space":
-        return SpaceNodeItem(node_uuid=node_uuid, name=name, size=size)
+        return SpaceNodeItem(
+            node_uuid=node_uuid,
+            name=name,
+            size=size,
+            expanded=expanded,
+        )
 
-    return SpaceNodeItem(node_uuid=node_uuid, name=name, size=size)
+    return SpaceNodeItem(
+        node_uuid=node_uuid,
+        name=name,
+        size=size,
+        expanded=expanded,
+    )

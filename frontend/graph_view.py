@@ -109,6 +109,7 @@ class GraphView(QGraphicsView):
                 name=node["name"],
                 node_type=node["type"],
                 size=node.get("size", 100),
+                expanded=node.get("expanded", None),
             )
 
             x, y = self.node_positions.get(

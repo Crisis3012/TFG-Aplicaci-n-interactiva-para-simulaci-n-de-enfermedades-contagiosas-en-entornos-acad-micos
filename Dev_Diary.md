@@ -36,3 +36,6 @@
 
 - Versión 0.1.4:
     Se ha cambiado el comportamiento de la creación de clases para que si estas en una clase puedas crear otra y que esta se vuelva hermana en vez de crearse en el root como se hacía antes. Tambien se ha hecho la estructura de la FIUAB casi entera.
+
+- Versión 0.1.5:
+    Se ha hecho que el borde de los grupos cambie de color en función de si están contraídos o no, se han guardado los archivos antiguos en una carpeta de deprecados y se ha terminado el arbol de espacios de la FIUAB. A parte se ha hceho un arbol de ficheros y se ha preparado la incorporación de la visualización de simulaciones.
