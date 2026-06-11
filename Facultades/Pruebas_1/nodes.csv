@@ -3,6 +3,6 @@ d9be3e2e-7581-443a-8d9d-76def7852c9d,spacegroup,Grupo1,a422a50c-acd4-4b1d-a657-f
 5cb6433c-05a5-4955-a8e6-bf9b2962b4df,space,Clase1,d9be3e2e-7581-443a-8d9d-76def7852c9d,1.0,,,,0,,,0.0,0.0,,,,,,,,,
 042fe007-c088-4f72-9960-cc05e7cd69ed,space,Clase2,d9be3e2e-7581-443a-8d9d-76def7852c9d,1.0,,,,0,,,0.0,0.0,,,,,,,,,
 f052d030-208c-4e49-b314-a97ea08cdbc5,space,Clase3,a422a50c-acd4-4b1d-a657-f757c9b3bcfd,1.0,,50,,0,,,0.0,0.0,,,,,,,,,
-15d64f11-b960-4407-8e69-2b9beaaaf687,career,GED,a422a50c-acd4-4b1d-a657-f757c9b3bcfd,1.0,1,,,,,,,,,,,,,,,,
-26cc0afb-4844-420c-9d6b-3f6da48d1d5e,course,1º,15d64f11-b960-4407-8e69-2b9beaaaf687,1.0,1,,,,,,,,,,,,,,,15d64f11-b960-4407-8e69-2b9beaaaf687,
+15d64f11-b960-4407-8e69-2b9beaaaf687,career,GED,a422a50c-acd4-4b1d-a657-f757c9b3bcfd,1.0,1,,,,,,,,60,,,,,,,,
+26cc0afb-4844-420c-9d6b-3f6da48d1d5e,course,1º,15d64f11-b960-4407-8e69-2b9beaaaf687,1.0,1,,,,,,,,,,60,,,,,15d64f11-b960-4407-8e69-2b9beaaaf687,
 e2d1b40d-70cd-43a3-9467-b1a99b1f5351,coursegroup,Nuevo grupo,26cc0afb-4844-420c-9d6b-3f6da48d1d5e,1.0,1,,,,,,,,,,,,,,,,26cc0afb-4844-420c-9d6b-3f6da48d1d5e

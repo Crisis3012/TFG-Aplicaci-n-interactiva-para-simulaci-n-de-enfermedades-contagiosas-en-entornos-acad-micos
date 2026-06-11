@@ -39,3 +39,6 @@
 
 - Versión 0.1.5:
     Se ha hecho que el borde de los grupos cambie de color en función de si están contraídos o no, se han guardado los archivos antiguos en una carpeta de deprecados y se ha terminado el arbol de espacios de la FIUAB. A parte se ha hceho un arbol de ficheros y se ha preparado la incorporación de la visualización de simulaciones.
+
+- Versión 0.1.6:
+    Se ha creado la parte visual de la simulacion, con movimiento de personas, avisos en contagios y una pequeña visualizacion general a la dercha, falta añadir grafos concretos y generales en tiempo real en funcion de los resultados para dar más info al usuario. Los colores de las personas moviendose representan el estado de los estudiantes en el grupo. Ahora mismo tenemos esto: S = susceptible = azul, E = exposed = amarillo, I = infectious = rojo, R = recovered = verde. 

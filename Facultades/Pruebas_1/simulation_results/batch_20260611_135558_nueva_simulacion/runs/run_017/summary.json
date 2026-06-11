@@ -1,0 +1,15 @@
+{
+    "run_id": "40b4a0ed-2f25-44d9-b00f-add3644f5fa1",
+    "simulation_name": "Nueva simulación - run 017",
+    "seed": 1608783415,
+    "total_agents": 60,
+    "initial_infections": 10,
+    "internal_infections": 1,
+    "total_ever_infected": 11,
+    "peak_infectious": 10,
+    "final_susceptible": 49,
+    "final_exposed": 0,
+    "final_infectious": 0,
+    "final_recovered": 11,
+    "warnings": []
+}

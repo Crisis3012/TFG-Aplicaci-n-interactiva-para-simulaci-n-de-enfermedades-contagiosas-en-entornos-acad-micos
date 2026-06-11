@@ -1,0 +1,17 @@
+{
+    "run_id": "65669be6-3125-4ec7-8dcb-766d748eac98",
+    "simulation_name": "Nueva simulación",
+    "seed": 2796021033,
+    "total_agents": 30,
+    "initial_infections": 1,
+    "internal_infections": 0,
+    "total_ever_infected": 1,
+    "peak_infectious": 1,
+    "final_susceptible": 29,
+    "final_exposed": 0,
+    "final_infectious": 1,
+    "final_recovered": 0,
+    "warnings": [
+        "No se ha definido número de estudiantes para el curso '1º'. Se usará el valor por defecto: 30."
+    ]
+}

@@ -148,6 +148,7 @@ class SimulationController:
         progress_callback: Optional[ProgressCallback] = None,
         save_results: bool = True,
         save_individual_runs: bool = True,
+        generate_visual_trace: bool = False,
     ) -> SimulationExecutionResponse:
         """
         Ejecuta una simulación individual o un batch según config.batch.
@@ -170,6 +171,7 @@ class SimulationController:
             return self._run_single(
                 config=config,
                 save_results=save_results,
+                generate_visual_trace=generate_visual_trace,
             )
 
         except Exception as exc:
@@ -190,6 +192,7 @@ class SimulationController:
         self,
         config: SimulationConfig,
         save_results: bool,
+        generate_visual_trace: bool = False,
     ) -> SimulationExecutionResponse:
         single_config = deepcopy(config)
 
@@ -202,6 +205,7 @@ class SimulationController:
         engine = SimulationEngine(
             faculty=self.faculty,
             config=single_config,
+            generate_visual_trace=generate_visual_trace,
         )
 
         result = engine.run()

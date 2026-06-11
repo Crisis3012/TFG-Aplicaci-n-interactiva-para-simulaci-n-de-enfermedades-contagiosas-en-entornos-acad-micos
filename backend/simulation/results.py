@@ -4,6 +4,7 @@ from dataclasses import dataclass, field, asdict
 from typing import Any, Optional
 
 from backend.simulation.contact import InfectionEvent
+from backend.simulation.visual_trace import SimulationVisualTrace
 
 
 @dataclass
@@ -75,6 +76,8 @@ class SimulationResult:
     space_summary: list[SpaceSummaryRow] = field(default_factory=list)
     group_summary: list[GroupSummaryRow] = field(default_factory=list)
 
+    visual_trace: Optional[SimulationVisualTrace] = None
+
     final_summary: dict[str, Any] = field(default_factory=dict)
 
     started_at: Optional[str] = None
@@ -102,6 +105,12 @@ class SimulationResult:
 
     def group_summary_as_dicts(self) -> list[dict[str, Any]]:
         return [row.to_dict() for row in self.group_summary]
+    
+    def visual_trace_as_dict(self) -> Optional[dict[str, Any]]:
+        if self.visual_trace is None:
+            return None
+
+        return self.visual_trace.to_dict()
 
 
 @dataclass

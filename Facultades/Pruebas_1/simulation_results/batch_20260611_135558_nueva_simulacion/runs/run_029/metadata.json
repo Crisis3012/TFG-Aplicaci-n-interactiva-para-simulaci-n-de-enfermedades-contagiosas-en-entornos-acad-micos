@@ -1,0 +1,19 @@
+{
+    "type": "simulation_run",
+    "created_at": "2026-06-11T13:55:59",
+    "run_id": "06113e46-be3a-43a8-b355-963828142e47",
+    "simulation_name": "Nueva simulación - run 029",
+    "seed": 3904817970,
+    "started_at": "2026-06-11T13:55:55",
+    "finished_at": "2026-06-11T13:55:56",
+    "execution_time_seconds": 0.10305389994755387,
+    "files": {
+        "metadata": "metadata.json",
+        "config": "config.json",
+        "summary": "summary.json",
+        "time_series": "time_series.csv",
+        "infection_events": "infection_events.csv",
+        "space_summary": "space_summary.csv",
+        "group_summary": "group_summary.csv"
+    }
+}

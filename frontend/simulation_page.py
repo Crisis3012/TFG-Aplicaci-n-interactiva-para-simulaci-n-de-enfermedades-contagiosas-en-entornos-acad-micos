@@ -31,11 +31,19 @@ from backend.simulation.disease import DiseaseState
 
 
 class SimulationPage(QWidget):
-    def __init__(self, stacked_widget, simulation_controller):
+    def __init__(
+        self,
+        stacked_widget,
+        simulation_controller,
+        visualization_page=None,
+        visualization_page_index: Optional[int] = None,
+    ):
         super().__init__()
 
         self.stacked_widget = stacked_widget
         self.simulation_controller = simulation_controller
+        self.visualization_page = visualization_page
+        self.visualization_page_index = visualization_page_index
 
         self.disease_presets = {}
 
@@ -137,6 +145,33 @@ class SimulationPage(QWidget):
         main_layout.addWidget(config_group)
 
         # -------------------------
+        # Visualización
+        # -------------------------
+
+        visualization_group = QGroupBox("Visualización")
+        visualization_layout = QVBoxLayout()
+        visualization_layout.setSpacing(8)
+
+        self.generate_visual_trace_checkbox = QCheckBox(
+            "Generar visualización animada al finalizar"
+        )
+        self.generate_visual_trace_checkbox.setChecked(False)
+
+        visualization_help_label = QLabel(
+            "Disponible solo para simulaciones individuales. "
+            "La simulación se calculará primero y después se guardará una traza visual "
+            "para reproducirla como animación."
+        )
+        visualization_help_label.setWordWrap(True)
+        visualization_help_label.setStyleSheet("font-size: 12px; color: #666;")
+
+        visualization_layout.addWidget(self.generate_visual_trace_checkbox)
+        visualization_layout.addWidget(visualization_help_label)
+
+        visualization_group.setLayout(visualization_layout)
+        main_layout.addWidget(visualization_group)
+
+        # -------------------------
         # Batch
         # -------------------------
 
@@ -235,6 +270,7 @@ class SimulationPage(QWidget):
         self.batch_seed_input.clear()
         self.progress_bar.setVisible(False)
         self.progress_bar.setValue(0)
+        self.generate_visual_trace_checkbox.setChecked(False)
 
     def _refresh_active_faculty_label(self) -> None:
         active_name = self.simulation_controller.active_faculty_name
@@ -266,6 +302,25 @@ class SimulationPage(QWidget):
     def go_back(self) -> None:
         self.stacked_widget.setCurrentIndex(0)
 
+    def _open_visualization_page(self, visual_trace_path: Path) -> None:
+        """
+        Abre la página de visualización con la traza generada.
+
+        De momento carga una vista textual/reproductor básico.
+        Más adelante esta página contendrá el grafo animado.
+        """
+
+        if self.visualization_page is None or self.visualization_page_index is None:
+            self._append_output(
+                "Aviso: la página de visualización no está conectada todavía."
+            )
+            return
+
+        if hasattr(self.visualization_page, "load_trace"):
+            self.visualization_page.load_trace(visual_trace_path)
+
+        self.stacked_widget.setCurrentIndex(self.visualization_page_index)
+
     # ========================================================
     # Ejecución
     # ========================================================
@@ -292,11 +347,17 @@ class SimulationPage(QWidget):
 
         self._append_output("Ejecutando simulación...")
 
+        generate_visual_trace = (
+            self.generate_visual_trace_checkbox.isChecked()
+            and not config.batch.enabled
+        )
+
         response = self.simulation_controller.run_simulation(
             config=config,
             progress_callback=self._on_batch_progress,
             save_results=True,
             save_individual_runs=self.save_individual_runs_checkbox.isChecked(),
+            generate_visual_trace=generate_visual_trace,
         )
 
         self.run_button.setEnabled(True)
@@ -318,6 +379,17 @@ class SimulationPage(QWidget):
 
         if response.saved_path is not None:
             self._append_output(f"Resultados guardados en: {response.saved_path}")
+
+        if generate_visual_trace and response.saved_path is not None:
+            visual_trace_path = response.saved_path / "visual_trace.json"
+
+            if visual_trace_path.exists():
+                self._append_output(f"Traza visual guardada en: {visual_trace_path}")
+                self._open_visualization_page(visual_trace_path)
+            else:
+                self._append_output(
+                    "Aviso: se pidió traza visual, pero no se ha encontrado visual_trace.json."
+                )
 
         if response.is_batch:
             self._show_batch_result(response.result)
@@ -466,13 +538,19 @@ class SimulationPage(QWidget):
     # ========================================================
 
     def _update_batch_controls(self) -> None:
-        enabled = self.batch_enabled_checkbox.isChecked()
+        batch_enabled = self.batch_enabled_checkbox.isChecked()
 
-        self.batch_runs_spin.setEnabled(enabled)
-        self.batch_seed_input.setEnabled(enabled)
-        self.save_individual_runs_checkbox.setEnabled(enabled)
+        self.batch_runs_spin.setEnabled(batch_enabled)
+        self.batch_seed_input.setEnabled(batch_enabled)
+        self.save_individual_runs_checkbox.setEnabled(batch_enabled)
 
-        if enabled:
+        if hasattr(self, "generate_visual_trace_checkbox"):
+            self.generate_visual_trace_checkbox.setEnabled(not batch_enabled)
+
+            if batch_enabled:
+                self.generate_visual_trace_checkbox.setChecked(False)
+
+        if batch_enabled:
             self.run_button.setText("Ejecutar batch")
         else:
             self.run_button.setText("Ejecutar simulación")

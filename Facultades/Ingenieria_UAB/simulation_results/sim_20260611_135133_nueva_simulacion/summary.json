@@ -1,0 +1,17 @@
+{
+    "run_id": "bc3ddae4-329f-479a-8dc7-2d9684654395",
+    "simulation_name": "Nueva simulación",
+    "seed": 3737937743,
+    "total_agents": 0,
+    "initial_infections": 0,
+    "internal_infections": 0,
+    "total_ever_infected": 0,
+    "peak_infectious": 0,
+    "final_susceptible": 0,
+    "final_exposed": 0,
+    "final_infectious": 0,
+    "final_recovered": 0,
+    "warnings": [
+        "No se han podido aplicar infecciones iniciales: no hay candidatos."
+    ]
+}

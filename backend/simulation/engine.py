@@ -32,6 +32,14 @@ from backend.simulation.results import (
     GroupSummaryRow,
 )
 from backend.simulation.transmission_model import TransmissionModel
+from backend.simulation.visual_trace import (
+    SimulationVisualTrace,
+    VisualAgentLocation,
+    VisualAgentState,
+    VisualEvent,
+    VisualFrame,
+    VisualSpaceSummary,
+)
 
 
 @dataclass
@@ -66,6 +74,7 @@ class SimulationEngine:
         self,
         faculty: Faculty,
         config: SimulationConfig,
+        generate_visual_trace: bool = False,
     ) -> None:
         self.faculty = faculty
         self.config = config
@@ -73,6 +82,12 @@ class SimulationEngine:
         self.run_id = str(uuid.uuid4())
         self.seed = self._resolve_seed(config.seed)
         self.rng = random.Random(self.seed)
+
+        self.generate_visual_trace = generate_visual_trace
+
+        # RNG separado para decisiones puramente visuales.
+        # Importante: no debe alterar el RNG epidemiológico de la simulación.
+        self.visual_rng = random.Random(f"{self.seed}:visual")
 
         self.adapter = FacultySimulationAdapter(faculty)
         self.behavior_model = AgentBehaviorModel()
@@ -91,6 +106,10 @@ class SimulationEngine:
 
         self.initial_infected_agent_ids: list[str] = []
         self.warnings: list[str] = []
+
+        self.visual_locations: list[VisualAgentLocation] = []
+        self.visual_events: list[VisualEvent] = []
+        self.visual_frames: list[VisualFrame] = []
 
     # ========================================================
     # API PRINCIPAL
@@ -114,6 +133,18 @@ class SimulationEngine:
             slot=0,
             new_infections=0,
         )
+
+        if self.generate_visual_trace:
+            initial_visual_events = self._build_initial_visual_events(
+                current_slot=0,
+            )
+            self.visual_events.extend(initial_visual_events)
+
+            self._record_visual_frame(
+                slot=0,
+                planned_events=[],
+                visual_events=initial_visual_events,
+            )
 
         event_planner = EventPlanner(self.data.space_contexts)
         idle_periods = event_planner.build_idle_periods(self.data.events)
@@ -168,10 +199,12 @@ class SimulationEngine:
                 planned_events = self._merge_planned_events_if_needed(planned_events)
 
                 new_infections = 0
+                slot_infection_events: list[InfectionEvent] = []
 
                 for planned_event in planned_events:
                     event_infections = self._process_planned_event(planned_event)
                     self.infection_events.extend(event_infections)
+                    slot_infection_events.extend(event_infections)
                     new_infections += len(event_infections)
 
                 self._record_time_series(
@@ -179,12 +212,36 @@ class SimulationEngine:
                     new_infections=new_infections,
                 )
 
+                if self.generate_visual_trace:
+                    slot_visual_events = self._build_visual_events_from_infections(
+                        infection_events=slot_infection_events,
+                    )
+
+                    self.visual_events.extend(slot_visual_events)
+
+                    self._record_visual_locations(
+                        planned_events=planned_events,
+                    )
+
+                    self._record_visual_frame(
+                        slot=start_slot,
+                        planned_events=planned_events,
+                        visual_events=slot_visual_events,
+                    )
+
             day_end_slot = (day_index + 1) * self.data.slots_per_day
             self._update_agent_states(current_slot=day_end_slot)
             self._record_time_series(
                 slot=day_end_slot,
                 new_infections=0,
             )
+
+            if self.generate_visual_trace:
+                self._record_visual_frame(
+                    slot=day_end_slot,
+                    planned_events=[],
+                    visual_events=[],
+                )
 
             self.behavior_model.end_day()
 
@@ -606,6 +663,336 @@ class SimulationEngine:
                 self.group_peak_infectious[group_id] = count
 
     # ========================================================
+    # TRAZA VISUAL
+    # ========================================================
+
+    def _build_initial_visual_events(
+        self,
+        current_slot: int,
+    ) -> list[VisualEvent]:
+        """
+        Crea eventos visuales para los infectados iniciales.
+
+        No representan contagios internos, pero ayudan a entender
+        dónde empieza la simulación epidemiológica.
+        """
+
+        events: list[VisualEvent] = []
+
+        for agent_id in sorted(self.initial_infected_agent_ids):
+            agent = self.agents_by_id.get(agent_id)
+
+            if agent is None:
+                continue
+
+            events.append(
+                VisualEvent(
+                    event_type="initial_infection",
+                    slot=current_slot,
+                    visual_offset=0.0,
+                    target_agent_id=agent.agent_id,
+                    data={
+                        "state": agent.state.value,
+                        "academic_group_id": agent.academic_group_id,
+                        "course_uuid": agent.course_uuid,
+                        "career_uuid": agent.career_uuid,
+                        "infection_chain_id": agent.infection_chain_id,
+                    },
+                )
+            )
+
+        return events
+
+    def _build_visual_events_from_infections(
+        self,
+        infection_events: list[InfectionEvent],
+    ) -> list[VisualEvent]:
+        """
+        Convierte InfectionEvent en VisualEvent.
+
+        El visual_offset se genera con un RNG separado para no alterar
+        el resultado epidemiológico de la simulación.
+        """
+
+        visual_events: list[VisualEvent] = []
+
+        for infection in infection_events:
+            visual_events.append(
+                VisualEvent(
+                    event_type="infection",
+                    slot=infection.slot,
+                    visual_offset=self.visual_rng.random(),
+                    space_uuid=infection.space_uuid,
+                    source_agent_id=infection.source_agent_id,
+                    target_agent_id=infection.infected_agent_id,
+                    related_event_id=infection.event_id,
+                    data={
+                        "infection_id": infection.infection_id,
+                        "transmission_probability": infection.transmission_probability,
+                        "infection_chain_id": infection.infection_chain_id,
+                    },
+                )
+            )
+
+        return visual_events
+
+    def _record_visual_locations(
+        self,
+        planned_events: list[PlannedSimulationEvent],
+    ) -> None:
+        """
+        Registra intervalos lógicos de ubicación de agentes.
+
+        El motor no calcula movimiento continuo.
+        Solo indica que un agente está en un espacio durante cierto intervalo.
+        """
+
+        for planned_event in planned_events:
+            event = planned_event.event
+
+            if event.space_uuid is None:
+                continue
+
+            for agent_id in sorted(planned_event.agent_ids):
+                agent = self.agents_by_id.get(agent_id)
+
+                if agent is None:
+                    continue
+
+                self.visual_locations.append(
+                    VisualAgentLocation(
+                        agent_id=agent.agent_id,
+                        start_slot=event.start_slot,
+                        end_slot=event.end_slot,
+                        space_uuid=event.space_uuid,
+                        event_id=event.event_id,
+                        activity_type=event.activity_type.value,
+                        academic_group_id=agent.academic_group_id,
+                        course_uuid=agent.course_uuid,
+                        career_uuid=agent.career_uuid,
+                    )
+                )
+
+    def _record_visual_frame(
+        self,
+        slot: int,
+        planned_events: list[PlannedSimulationEvent],
+        visual_events: list[VisualEvent],
+    ) -> None:
+        """
+        Registra un fotograma lógico.
+
+        Este frame sirve para:
+        - actualizar burbujas;
+        - actualizar paneles de estado;
+        - saber qué eventos visuales ocurren en esta franja.
+        """
+
+        if self.data is None:
+            raise RuntimeError("No hay datos de simulación cargados.")
+
+        day_index = (
+            slot // self.data.slots_per_day
+            if self.data.slots_per_day > 0
+            else 0
+        )
+
+        if planned_events:
+            end_slot = max(
+                planned_event.event.end_slot
+                for planned_event in planned_events
+            )
+        else:
+            end_slot = slot
+
+        frame = VisualFrame(
+            slot=slot,
+            day_index=day_index,
+            start_slot=slot,
+            end_slot=end_slot,
+            agent_states=self._build_visual_agent_states(),
+            space_summaries=self._build_visual_space_summaries(
+                planned_events=planned_events,
+                visual_events=visual_events,
+            ),
+            events=list(visual_events),
+        )
+
+        self._append_or_replace_visual_frame(frame)
+
+    def _append_or_replace_visual_frame(
+        self,
+        frame: VisualFrame,
+    ) -> None:
+        """
+        Evita duplicar frames del mismo slot.
+
+        Puede pasar con el slot 0:
+        - primero registramos el estado inicial;
+        - después puede haber eventos académicos que empiezan en slot 0.
+        """
+
+        for index, existing_frame in enumerate(self.visual_frames):
+            if existing_frame.slot == frame.slot:
+                self.visual_frames[index] = frame
+                return
+
+        self.visual_frames.append(frame)
+
+    def _build_visual_agent_states(self) -> dict[str, VisualAgentState]:
+        """
+        Crea una foto del estado epidemiológico de todos los agentes.
+        """
+
+        states: dict[str, VisualAgentState] = {}
+
+        for agent_id, agent in self.agents_by_id.items():
+            states[agent_id] = VisualAgentState(
+                agent_id=agent.agent_id,
+                state=agent.state.value,
+                is_isolated=agent.is_isolated,
+                academic_group_id=agent.academic_group_id,
+                course_uuid=agent.course_uuid,
+                career_uuid=agent.career_uuid,
+                infection_slot=agent.infection_slot,
+                infected_by=agent.infected_by,
+                infection_chain_id=agent.infection_chain_id,
+            )
+
+        return states
+
+    def _build_visual_space_summaries(
+        self,
+        planned_events: list[PlannedSimulationEvent],
+        visual_events: list[VisualEvent],
+    ) -> dict[str, VisualSpaceSummary]:
+        """
+        Construye los datos de burbuja por espacio para una franja.
+
+        Solo los agentes presentes en planned_events cuentan como presentes.
+        Si un agente no está en ningún evento de la franja, se interpreta
+        como fuera de espacios visualizables.
+        """
+
+        if self.data is None:
+            raise RuntimeError("No hay datos de simulación cargados.")
+
+        summaries: dict[str, VisualSpaceSummary] = {}
+
+        for space_uuid, context in self.data.space_contexts.items():
+            summaries[space_uuid] = VisualSpaceSummary(
+                space_uuid=space_uuid,
+                space_name=context.space_name,
+                space_type_uuid=context.space_type_uuid,
+                space_type_name=context.space_type_name,
+            )
+
+        agents_by_space: dict[str, set[str]] = defaultdict(set)
+
+        for planned_event in planned_events:
+            event = planned_event.event
+
+            if event.space_uuid is None:
+                continue
+
+            agents_by_space[event.space_uuid].update(
+                agent_id
+                for agent_id in planned_event.agent_ids
+                if agent_id in self.agents_by_id
+            )
+
+        for space_uuid, agent_ids in agents_by_space.items():
+            if space_uuid not in summaries:
+                summaries[space_uuid] = VisualSpaceSummary(
+                    space_uuid=space_uuid,
+                )
+
+            summary = summaries[space_uuid]
+            summary.present_agents = len(agent_ids)
+
+            for agent_id in agent_ids:
+                agent = self.agents_by_id.get(agent_id)
+
+                if agent is None:
+                    continue
+
+                if agent.state == DiseaseState.SUSCEPTIBLE:
+                    summary.susceptible += 1
+                elif agent.state == DiseaseState.EXPOSED:
+                    summary.exposed += 1
+                elif agent.state == DiseaseState.INFECTIOUS:
+                    summary.infectious += 1
+                elif agent.state == DiseaseState.RECOVERED:
+                    summary.recovered += 1
+
+                if agent.is_isolated:
+                    summary.isolated += 1
+
+        for event in visual_events:
+            if event.space_uuid is None:
+                continue
+
+            if event.space_uuid not in summaries:
+                summaries[event.space_uuid] = VisualSpaceSummary(
+                    space_uuid=event.space_uuid,
+                )
+
+            if event.event_type in {
+                "infection",
+                "space_indirect_infection",
+            }:
+                summaries[event.space_uuid].new_infections += 1
+
+        return summaries
+
+    def _build_visual_trace(self) -> SimulationVisualTrace:
+        """
+        Construye la traza visual final de la simulación.
+        """
+
+        if self.data is None:
+            raise RuntimeError("No hay datos de simulación cargados.")
+
+        return SimulationVisualTrace(
+            run_id=self.run_id,
+            simulation_name=self.config.name,
+            seed=self.seed,
+            slot_minutes=self.data.slot_minutes,
+            slots_per_day=self.data.slots_per_day,
+            duration_days=self.config.duration_days,
+            locations=sorted(
+                self.visual_locations,
+                key=lambda location: (
+                    location.start_slot,
+                    location.end_slot,
+                    location.space_uuid or "",
+                    location.agent_id,
+                ),
+            ),
+            frames=sorted(
+                self.visual_frames,
+                key=lambda frame: frame.slot,
+            ),
+            events=sorted(
+                self.visual_events,
+                key=lambda event: (
+                    event.slot,
+                    event.visual_offset,
+                    event.event_type,
+                    event.target_agent_id or "",
+                ),
+            ),
+            metadata={
+                "trace_version": "1.0",
+                "generated_by": "SimulationEngine",
+                "description": (
+                    "Traza visual post-cálculo para reproducir una simulación "
+                    "como animación sin recalcular la lógica epidemiológica."
+                ),
+            },
+        )
+
+    # ========================================================
     # CONSTRUCCIÓN DE RESULTADOS
     # ========================================================
 
@@ -616,6 +1003,11 @@ class SimulationEngine:
         execution_time_seconds: float,
     ) -> SimulationResult:
         final_counts = self._count_states()
+
+        visual_trace = None
+
+        if self.generate_visual_trace:
+            visual_trace = self._build_visual_trace()
 
         result = SimulationResult(
             run_id=self.run_id,
@@ -629,6 +1021,7 @@ class SimulationEngine:
             infection_events=list(self.infection_events),
             space_summary=self._build_space_summary(),
             group_summary=self._build_group_summary(),
+            visual_trace=visual_trace,
             final_summary=self._build_final_summary(final_counts),
         )
 

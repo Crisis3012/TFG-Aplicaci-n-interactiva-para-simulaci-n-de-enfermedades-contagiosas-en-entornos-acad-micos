@@ -1,0 +1,20 @@
+{
+    "type": "simulation_run",
+    "created_at": "2026-06-11T13:52:52",
+    "run_id": "55c6182f-6970-4eef-97ec-996deaf33084",
+    "simulation_name": "prueba_visualizacion",
+    "seed": 3305935487,
+    "started_at": "2026-06-11T13:52:52",
+    "finished_at": "2026-06-11T13:52:52",
+    "execution_time_seconds": 0.11631650000344962,
+    "files": {
+        "metadata": "metadata.json",
+        "config": "config.json",
+        "summary": "summary.json",
+        "time_series": "time_series.csv",
+        "infection_events": "infection_events.csv",
+        "space_summary": "space_summary.csv",
+        "group_summary": "group_summary.csv",
+        "visual_trace": "visual_trace.json"
+    }
+}

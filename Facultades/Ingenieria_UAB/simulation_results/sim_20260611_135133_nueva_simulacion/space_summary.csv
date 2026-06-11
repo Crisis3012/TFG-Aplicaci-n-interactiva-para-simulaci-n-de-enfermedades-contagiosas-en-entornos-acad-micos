@@ -1,0 +1,54 @@
+space_uuid,space_name,space_type_uuid,space_type_name,infection_count,event_count_with_infections
+3efd30a0-09a6-4565-8f0d-39044c317374,Aula d'informàtica A,classroom,Clase,0,0
+621115d9-af05-480e-88d6-2054cda59426,Aula d'informàtica B,classroom,Clase,0,0
+52fe1356-6abf-4bf9-bd50-8277d6a09007,Aula d'ús lliure,common_space,Sala común,0,0
+28be30ff-bc29-4ced-bdb7-64160f7f5d9d,Laboratori d'arquietactura de computadors i sistemes operatius,lab,Laboratorio,0,0
+858040ae-38e0-4f00-8843-92a15c4d1a56,Laboratori d'automàtica,lab,Laboratorio,0,0
+0bf18a33-6088-46a4-986c-0a1ed5ca8c88,Laboratori d'electrònica general,lab,Laboratorio,0,0
+658d96df-acce-43d2-9219-63efff93b5ad,Laboratori d'electrònica per a la telecomunicació,lab,Laboratorio,0,0
+be185142-993f-4812-9a4d-97d12a63ae34,Laboratori d'enginyeria electrònica,lab,Laboratorio,0,0
+3bdd5e7b-1d69-4379-9d73-0a69127c8f48,Laboratori d'enginyeria química A,lab,Laboratorio,0,0
+56539f55-b7d9-4cc2-b192-483102204824,Laboratori d'enginyeria química B,lab,Laboratorio,0,0
+be3c6211-51d9-4fcb-9384-ea7930c1e2fe,Laboratori d'estructura de computadors,lab,Laboratorio,0,0
+42ebbd86-01a6-4a9e-9cc6-2435eed74dcf,Laboratori de comunicacions,lab,Laboratorio,0,0
+2b77be05-8325-41ca-8cf9-476d96c2b463,Laboratori de microelectrònica,lab,Laboratorio,0,0
+e3829888-2bfb-4327-8fcd-8f2ef05891e0,Laboratori de processament de senyal,lab,Laboratorio,0,0
+6115dfee-6e8f-446f-897c-642c0c121b86,Laboratori de projectes,lab,Laboratorio,0,0
+15be9dc3-9ef7-4f6a-a0fe-b07ebc23e85b,Laboratori de sistemes digitals,lab,Laboratorio,0,0
+a4cb4dea-46fc-48bf-af1a-0933fc340dd7,Laboratori de teoria de senyal i comunicacions,lab,Laboratorio,0,0
+3b30aedd-556a-4627-bfc7-1387446274c0,Laboratori integrat d'informàtica 1,lab,Laboratorio,0,0
+42b08884-77ec-4419-9340-b6b4e9364ed6,Laboratori integrat d'informàtica 2,lab,Laboratorio,0,0
+3dc69da4-e3d6-4c4c-a594-303031db4f84,Laboratori integrat d'informàtica 3,lab,Laboratorio,0,0
+75f46fd8-abd3-4f70-a456-719c6280defc,Laboratori integrat d'informàtica 4,lab,Laboratorio,0,0
+9eef45b4-12ea-45a8-b729-881c33744e89,Laboratori integrat d'informàtica 5,lab,Laboratorio,0,0
+2a600a64-cbb6-4f23-ae2a-6b045b08e650,Laboratori integrat d'informàtica 6,lab,Laboratorio,0,0
+19fea8a6-7d41-4720-9337-a59c54da119a,Menjador,common_space,Sala común,0,0
+3f09525f-8c2e-4237-819c-26c1ec3357f7,Pasillo,corridor,Pasillo,0,0
+81ff1e33-ed0f-4d67-87a6-87c19711620e,Q1/1003,classroom,Clase,0,0
+8f157a70-3edd-47d8-8764-4c328e3e9b48,Q1/1007,classroom,Clase,0,0
+685802c7-1b50-409e-aa7b-b0e8c20acdf1,Q1/1011,classroom,Clase,0,0
+867d1307-b041-4323-bc5a-4b1eae6d2c64,Q2/1003,classroom,Clase,0,0
+5ebb295b-b6ae-443c-8b58-fa531a817c72,Q2/1005,classroom,Clase,0,0
+88740ccc-56d6-4f39-895a-d3e575377b9e,Q2/1009,classroom,Clase,0,0
+d1c80479-1b36-4cf0-bdc0-8b269c73ffdd,Q2/1013,classroom,Clase,0,0
+d96180fe-7402-44d1-a2e5-ebe6ae59138b,Q3/0003,classroom,Clase,0,0
+25b5654f-fa95-4c48-b36a-91d56f1197a4,Q3/0009,classroom,Clase,0,0
+cc94501b-15e7-44bf-bf29-5c89a5e261b7,Q3/0011,classroom,Clase,0,0
+5f49da97-1495-4ffb-b632-c0f7ddcb18e7,Q3/0011,classroom,Clase,0,0
+2623d1e9-0fcb-492c-8061-212848dc667a,Q3/0013,classroom,Clase,0,0
+ff8fd195-e52a-4035-beb4-9e3a83665401,Q3/1003,classroom,Clase,0,0
+f75f59ba-f54e-4e02-a118-a75615a9bd9d,Q3/1007,classroom,Clase,0,0
+90a056f6-8ea6-414b-b919-6fee571d197c,Q3/1011,classroom,Clase,0,0
+54e9e58c-d836-4808-827c-c13e89bb8b19,Q4/0003,classroom,Clase,0,0
+9719af5b-81f4-42f8-be52-46f0b810ed4c,Q4/0007,classroom,Clase,0,0
+3fa9ade9-7a52-4b57-9ef9-d3a98452d94d,Q4/0011,classroom,Clase,0,0
+14f7dd87-cffc-4edd-9ef1-7c8b1a1203a1,Q4/1003,classroom,Clase,0,0
+da000ef4-a905-4659-b1cf-00619b03281b,Q4/1005,classroom,Clase,0,0
+da933de6-7cd0-4f23-81cc-9eced7b67de9,Q4/1009,classroom,Clase,0,0
+36fe28fb-ce55-46fe-9c4a-1d76e39fce11,Q4/1013,classroom,Clase,0,0
+ea0a4ff4-c420-4411-86ab-a48d873af43a,Q5/1011,lab,Laboratorio,0,0
+e197880e-b0ca-4217-8168-3f93ebf2d9c6,Q5/2007,lab,Laboratorio,0,0
+0b893a7d-b137-466d-8eb5-1f1510140a57,Q5/2009,lab,Laboratorio,0,0
+a3b8188a-e690-4a62-a161-76f40f3ab29f,Sala Graus,classroom,Clase,0,0
+9cc7df0c-597f-4e22-96c6-daa87800ec51,Sala d'estudi en silenci,common_space,Sala común,0,0
+a4424b7f-869c-447b-a8eb-b230cd51126c,Unitat de combinatoria i comunicació digital,lab,Laboratorio,0,0

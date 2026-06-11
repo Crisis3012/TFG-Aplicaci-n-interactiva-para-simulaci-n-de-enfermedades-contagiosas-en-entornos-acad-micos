@@ -150,6 +150,14 @@ class SimulationStorage:
             ],
         )
 
+        visual_trace = result.visual_trace_as_dict()
+
+        if visual_trace is not None:
+            self._write_json(
+                run_folder / "visual_trace.json",
+                visual_trace,
+            )
+
     # ========================================================
     # Guardado de batch
     # ========================================================
@@ -259,6 +267,19 @@ class SimulationStorage:
         self,
         result: SimulationResult,
     ) -> dict[str, Any]:
+        files = {
+            "metadata": "metadata.json",
+            "config": "config.json",
+            "summary": "summary.json",
+            "time_series": "time_series.csv",
+            "infection_events": "infection_events.csv",
+            "space_summary": "space_summary.csv",
+            "group_summary": "group_summary.csv",
+        }
+
+        if result.visual_trace is not None:
+            files["visual_trace"] = "visual_trace.json"
+
         return {
             "type": "simulation_run",
             "created_at": self._now_iso(),
@@ -268,15 +289,7 @@ class SimulationStorage:
             "started_at": result.started_at,
             "finished_at": result.finished_at,
             "execution_time_seconds": result.execution_time_seconds,
-            "files": {
-                "metadata": "metadata.json",
-                "config": "config.json",
-                "summary": "summary.json",
-                "time_series": "time_series.csv",
-                "infection_events": "infection_events.csv",
-                "space_summary": "space_summary.csv",
-                "group_summary": "group_summary.csv",
-            },
+            "files": files,
         }
 
     def _build_batch_metadata(
