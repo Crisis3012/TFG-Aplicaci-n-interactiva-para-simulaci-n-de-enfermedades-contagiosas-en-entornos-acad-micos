@@ -45,3 +45,6 @@
 
 - Versión 0.2.0:
     Se ha arreglado la muestra de eventos en la simulación en vivo y se ha arreglado un bug que hacía que los alumnos de un curso se añadieran diectamente a todos sus grupos en vez de repartirse entre ellos (duplicando o triplicando los alumnos de la universidad). Con esto damos como terminada la primera versión completa del apartado de simulación y preparamos la aplicación para incorporar la parte final de visualización de datos. Futuros ajustes a la simulación se contemplaran como mejoras de la infraestructura ya existente, permitiendo así ya el avance a la sigiente versión de la aplicación y entrando en la recta final con el 0.2.x.
+
+- Versión 0.2.1:
+    Se ha creado la página de visualización y se ha cambiado el guardado de resultados para adaptarlo a todas las visualizaciones a extraer. Se ha roto la simulación en el proceso pero debería poder arreglarse fácilmente. También se han eliminado las simulaciones de Pruebas_1 para más claredad al trabajar desde el visualizador. 

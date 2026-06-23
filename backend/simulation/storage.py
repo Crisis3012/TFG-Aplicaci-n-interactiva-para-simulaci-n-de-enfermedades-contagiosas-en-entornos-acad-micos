@@ -119,6 +119,60 @@ class SimulationStorage:
                 "slot",
                 "transmission_probability",
                 "infection_chain_id",
+
+                "source_group_uuid",
+                "source_group_name",
+                "source_course_uuid",
+                "source_course_name",
+                "source_career_uuid",
+                "source_career_name",
+
+                "infected_group_uuid",
+                "infected_group_name",
+                "infected_course_uuid",
+                "infected_course_name",
+                "infected_career_uuid",
+                "infected_career_name",
+
+                "space_name",
+                "space_type_uuid",
+                "space_type_name",
+            ],
+        )
+
+        self._write_csv(
+            run_folder / "occupancy_by_slot.csv",
+            result.occupancy_by_slot_as_dicts(),
+            fieldnames=[
+                "slot",
+                "day_index",
+                "present_agents",
+                "susceptible_present",
+                "exposed_present",
+                "infectious_present",
+                "recovered_present",
+                "isolated_present",
+                "new_infections",
+            ],
+        )
+
+        self._write_csv(
+            run_folder / "space_occupancy_by_slot.csv",
+            result.space_occupancy_by_slot_as_dicts(),
+            fieldnames=[
+                "slot",
+                "day_index",
+                "space_uuid",
+                "space_name",
+                "space_type_uuid",
+                "space_type_name",
+                "present_agents",
+                "susceptible_present",
+                "exposed_present",
+                "infectious_present",
+                "recovered_present",
+                "isolated_present",
+                "new_infections",
             ],
         )
 
@@ -273,6 +327,8 @@ class SimulationStorage:
             "summary": "summary.json",
             "time_series": "time_series.csv",
             "infection_events": "infection_events.csv",
+            "occupancy_by_slot": "occupancy_by_slot.csv",
+            "space_occupancy_by_slot": "space_occupancy_by_slot.csv",
             "space_summary": "space_summary.csv",
             "group_summary": "group_summary.csv",
         }

@@ -23,6 +23,45 @@ class TimeSeriesRow:
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
+@dataclass
+class OccupancyRow:
+    slot: int
+    day_index: int
+
+    present_agents: int = 0
+    susceptible_present: int = 0
+    exposed_present: int = 0
+    infectious_present: int = 0
+    recovered_present: int = 0
+    isolated_present: int = 0
+
+    new_infections: int = 0
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class SpaceOccupancyRow:
+    slot: int
+    day_index: int
+
+    space_uuid: str
+    space_name: Optional[str] = None
+    space_type_uuid: Optional[str] = None
+    space_type_name: Optional[str] = None
+
+    present_agents: int = 0
+    susceptible_present: int = 0
+    exposed_present: int = 0
+    infectious_present: int = 0
+    recovered_present: int = 0
+    isolated_present: int = 0
+
+    new_infections: int = 0
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
 
 @dataclass
 class SpaceSummaryRow:
@@ -73,6 +112,9 @@ class SimulationResult:
     time_series: list[TimeSeriesRow] = field(default_factory=list)
     infection_events: list[InfectionEvent] = field(default_factory=list)
 
+    occupancy_by_slot: list[OccupancyRow] = field(default_factory=list)
+    space_occupancy_by_slot: list[SpaceOccupancyRow] = field(default_factory=list)
+
     space_summary: list[SpaceSummaryRow] = field(default_factory=list)
     group_summary: list[GroupSummaryRow] = field(default_factory=list)
 
@@ -111,6 +153,12 @@ class SimulationResult:
             return None
 
         return self.visual_trace.to_dict()
+    
+    def occupancy_by_slot_as_dicts(self) -> list[dict[str, Any]]:
+        return [row.to_dict() for row in self.occupancy_by_slot]
+
+    def space_occupancy_by_slot_as_dicts(self) -> list[dict[str, Any]]:
+        return [row.to_dict() for row in self.space_occupancy_by_slot]
 
 
 @dataclass

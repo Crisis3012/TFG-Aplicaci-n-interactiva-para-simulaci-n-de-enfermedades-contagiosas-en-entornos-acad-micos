@@ -29,6 +29,9 @@ class Contact:
 class InfectionEvent:
     """
     Contagio real ocurrido durante la simulación.
+
+    Además de los UUIDs técnicos, guarda información académica y espacial
+    preparada para análisis y visualización estática.
     """
 
     infection_id: str
@@ -43,6 +46,24 @@ class InfectionEvent:
     transmission_probability: float
 
     infection_chain_id: str
+
+    source_group_uuid: Optional[str] = None
+    source_group_name: Optional[str] = None
+    source_course_uuid: Optional[str] = None
+    source_course_name: Optional[str] = None
+    source_career_uuid: Optional[str] = None
+    source_career_name: Optional[str] = None
+
+    infected_group_uuid: Optional[str] = None
+    infected_group_name: Optional[str] = None
+    infected_course_uuid: Optional[str] = None
+    infected_course_name: Optional[str] = None
+    infected_career_uuid: Optional[str] = None
+    infected_career_name: Optional[str] = None
+
+    space_name: Optional[str] = None
+    space_type_uuid: Optional[str] = None
+    space_type_name: Optional[str] = None
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

@@ -12,12 +12,14 @@ class MenuPage(QWidget):
         stacked_widget,
         builder_controller,
         simulation_page_index: int = 2,
+        visualization_page_index: int = 4,
     ):
         super().__init__()
 
         self.stacked_widget = stacked_widget
         self.builder_controller = builder_controller
         self.simulation_page_index = simulation_page_index
+        self.visualization_page_index = visualization_page_index
         self._updating_faculty_selector = False
 
         main_layout = QVBoxLayout()
@@ -63,6 +65,7 @@ class MenuPage(QWidget):
 
         self.btn_builder.clicked.connect(self.open_builder)
         self.btn_simular.clicked.connect(self.open_simulation)
+        self.btn_visualizar.clicked.connect(self.open_visualization)
         self.btn_salir.clicked.connect(QApplication.instance().quit)
 
         center_layout.addWidget(title)
@@ -92,6 +95,14 @@ class MenuPage(QWidget):
             simulation_page.load_page()
 
         self.stacked_widget.setCurrentIndex(self.simulation_page_index)
+
+    def open_visualization(self):
+        visualization_page = self.stacked_widget.widget(self.visualization_page_index)
+
+        if hasattr(visualization_page, "load_page"):
+            visualization_page.load_page()
+
+        self.stacked_widget.setCurrentIndex(self.visualization_page_index)
 
     def refresh_faculty_selector(self):
         self._updating_faculty_selector = True

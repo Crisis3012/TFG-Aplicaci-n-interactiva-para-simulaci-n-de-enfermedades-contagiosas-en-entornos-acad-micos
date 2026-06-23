@@ -30,6 +30,8 @@ from backend.simulation.results import (
     TimeSeriesRow,
     SpaceSummaryRow,
     GroupSummaryRow,
+    OccupancyRow,
+    SpaceOccupancyRow,
 )
 from backend.simulation.transmission_model import TransmissionModel
 from backend.simulation.visual_trace import (
@@ -102,6 +104,9 @@ class SimulationEngine:
         self.infection_events: list[InfectionEvent] = []
         self.time_series: list[TimeSeriesRow] = []
 
+        self.occupancy_by_slot: list[OccupancyRow] = []
+        self.space_occupancy_by_slot: list[SpaceOccupancyRow] = []
+
         self.group_peak_infectious: dict[str, int] = defaultdict(int)
 
         self.initial_infected_agent_ids: list[str] = []
@@ -132,6 +137,13 @@ class SimulationEngine:
         self._record_time_series(
             slot=0,
             new_infections=0,
+        )
+
+        self._record_occupancy(
+            slot=start_slot,
+            day_index=day_index,
+            planned_events=planned_events,
+            infection_events=slot_infection_events,
         )
 
         if self.generate_visual_trace:
@@ -431,7 +443,57 @@ class SimulationEngine:
             interventions=self.config.interventions,
         )
 
-        return infection_events
+        return [
+            self._enrich_infection_event(infection)
+            for infection in infection_events
+        ]
+    
+    def _enrich_infection_event(
+        self,
+        infection: InfectionEvent,
+    ) -> InfectionEvent:
+        if self.data is None:
+            return infection
+
+        source_agent = self.agents_by_id.get(infection.source_agent_id)
+        infected_agent = self.agents_by_id.get(infection.infected_agent_id)
+
+        source_context = None
+        infected_context = None
+
+        if source_agent is not None:
+            source_context = self.data.group_contexts.get(source_agent.academic_group_id)
+
+        if infected_agent is not None:
+            infected_context = self.data.group_contexts.get(infected_agent.academic_group_id)
+
+        space_context = None
+
+        if infection.space_uuid is not None:
+            space_context = self.data.space_contexts.get(infection.space_uuid)
+
+        if source_context is not None:
+            infection.source_group_uuid = source_context.academic_group_id
+            infection.source_group_name = source_context.group_name
+            infection.source_course_uuid = source_context.course_uuid
+            infection.source_course_name = source_context.course_name
+            infection.source_career_uuid = source_context.career_uuid
+            infection.source_career_name = source_context.career_name
+
+        if infected_context is not None:
+            infection.infected_group_uuid = infected_context.academic_group_id
+            infection.infected_group_name = infected_context.group_name
+            infection.infected_course_uuid = infected_context.course_uuid
+            infection.infected_course_name = infected_context.course_name
+            infection.infected_career_uuid = infected_context.career_uuid
+            infection.infected_career_name = infected_context.career_name
+
+        if space_context is not None:
+            infection.space_name = space_context.space_name
+            infection.space_type_uuid = space_context.space_type_uuid
+            infection.space_type_name = space_context.space_type_name
+
+        return infection
 
     # ========================================================
     # INFECTADOS INICIALES
@@ -630,6 +692,116 @@ class SimulationEngine:
             )
 
         self._update_group_peak_infectious()
+
+    def _record_occupancy(
+        self,
+        slot: int,
+        day_index: int,
+        planned_events: list[PlannedSimulationEvent],
+        infection_events: list[InfectionEvent],
+    ) -> None:
+        if self.data is None:
+            raise RuntimeError("No hay datos de simulación cargados.")
+
+        present_agent_ids: set[str] = set()
+
+        for planned_event in planned_events:
+            present_agent_ids.update(
+                agent_id
+                for agent_id in planned_event.agent_ids
+                if agent_id in self.agents_by_id
+            )
+
+        global_counts = self._count_present_agent_states(present_agent_ids)
+
+        self.occupancy_by_slot.append(
+            OccupancyRow(
+                slot=slot,
+                day_index=day_index,
+                present_agents=len(present_agent_ids),
+                susceptible_present=global_counts["susceptible"],
+                exposed_present=global_counts["exposed"],
+                infectious_present=global_counts["infectious"],
+                recovered_present=global_counts["recovered"],
+                isolated_present=global_counts["isolated"],
+                new_infections=len(infection_events),
+            )
+        )
+
+        infections_by_space: dict[str, int] = defaultdict(int)
+
+        for infection in infection_events:
+            if infection.space_uuid:
+                infections_by_space[infection.space_uuid] += 1
+
+        agent_ids_by_space: dict[str, set[str]] = defaultdict(set)
+
+        for planned_event in planned_events:
+            space_uuid = planned_event.event.space_uuid
+
+            if not space_uuid:
+                continue
+
+            agent_ids_by_space[space_uuid].update(
+                agent_id
+                for agent_id in planned_event.agent_ids
+                if agent_id in self.agents_by_id
+            )
+
+        for space_uuid, space_agent_ids in agent_ids_by_space.items():
+            space_context = self.data.space_contexts.get(space_uuid)
+            space_counts = self._count_present_agent_states(space_agent_ids)
+
+            self.space_occupancy_by_slot.append(
+                SpaceOccupancyRow(
+                    slot=slot,
+                    day_index=day_index,
+                    space_uuid=space_uuid,
+                    space_name=space_context.space_name if space_context is not None else None,
+                    space_type_uuid=space_context.space_type_uuid if space_context is not None else None,
+                    space_type_name=space_context.space_type_name if space_context is not None else None,
+                    present_agents=len(space_agent_ids),
+                    susceptible_present=space_counts["susceptible"],
+                    exposed_present=space_counts["exposed"],
+                    infectious_present=space_counts["infectious"],
+                    recovered_present=space_counts["recovered"],
+                    isolated_present=space_counts["isolated"],
+                    new_infections=infections_by_space.get(space_uuid, 0),
+                )
+            )
+
+
+    def _count_present_agent_states(
+        self,
+        agent_ids: set[str],
+    ) -> dict[str, int]:
+        counts = {
+            "susceptible": 0,
+            "exposed": 0,
+            "infectious": 0,
+            "recovered": 0,
+            "isolated": 0,
+        }
+
+        for agent_id in agent_ids:
+            agent = self.agents_by_id.get(agent_id)
+
+            if agent is None:
+                continue
+
+            if agent.state == DiseaseState.SUSCEPTIBLE:
+                counts["susceptible"] += 1
+            elif agent.state == DiseaseState.EXPOSED:
+                counts["exposed"] += 1
+            elif agent.state == DiseaseState.INFECTIOUS:
+                counts["infectious"] += 1
+            elif agent.state == DiseaseState.RECOVERED:
+                counts["recovered"] += 1
+
+            if agent.is_isolated:
+                counts["isolated"] += 1
+
+        return counts
 
     def _count_states(self) -> dict[DiseaseState, int]:
         counts = {
@@ -1094,6 +1266,8 @@ class SimulationEngine:
             config_snapshot=self.config.to_dict(),
             time_series=list(self.time_series),
             infection_events=list(self.infection_events),
+            occupancy_by_slot=list(self.occupancy_by_slot),
+            space_occupancy_by_slot=list(self.space_occupancy_by_slot),
             space_summary=self._build_space_summary(),
             group_summary=self._build_group_summary(),
             visual_trace=visual_trace,
