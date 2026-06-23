@@ -592,6 +592,13 @@ class SimulationVisualizationPage(QWidget):
         self,
         event: dict[str, Any],
     ) -> str:
+        data = event.get("data", {})
+
+        if isinstance(data, dict):
+            display_text = data.get("display_text")
+            if display_text:
+                return str(display_text)
+
         event_type = event.get("event_type", "event")
 
         if event_type == "infection":

@@ -72,3 +72,28 @@ e3829888-2bfb-4327-8fcd-8f2ef05891e0,space,Laboratori de processament de senyal,
 42ebbd86-01a6-4a9e-9cc6-2435eed74dcf,space,Laboratori de comunicacions,4f983353-c797-4d3b-a073-8fcd5958168f,1.0,,30,lab,0,,,0.0,0.0,,,,,,,,,
 658d96df-acce-43d2-9219-63efff93b5ad,space,Laboratori d'electrònica per a la telecomunicació,4f983353-c797-4d3b-a073-8fcd5958168f,1.0,,30,lab,0,,,0.0,0.0,,,,,,,,,
 3f09525f-8c2e-4237-819c-26c1ec3357f7,space,Pasillo,6ed72aab-42fb-4687-98d0-3ac798ee13b5,1.0,,,corridor,0,,,0.0,0.0,,,,,,,,,
+e99b1b11-e3f9-4843-9de0-777bed8d8338,space,Cafetería,6ed72aab-42fb-4687-98d0-3ac798ee13b5,1.0,,70,common_space,0,,,0.0,0.0,,,,,,,,,
+55a1404f-3bfc-443b-b572-8ce3e24f3552,career,GED,6ed72aab-42fb-4687-98d0-3ac798ee13b5,1.0,0,,,,,,,,60,,,,,,,,
+8728a798-202f-450f-888a-bf869a8b776c,course,1º,55a1404f-3bfc-443b-b572-8ce3e24f3552,1.0,1,,,,,,,,,,,,,,,55a1404f-3bfc-443b-b572-8ce3e24f3552,
+2cec3a12-d288-4fb2-834d-ddd6905904e2,coursegroup,81,8728a798-202f-450f-888a-bf869a8b776c,1.0,1,,,,,,,,,,,,,,,,8728a798-202f-450f-888a-bf869a8b776c
+3ac97f53-868d-40c3-84f8-b14f8068be7d,coursegroup,82,8728a798-202f-450f-888a-bf869a8b776c,1.0,1,,,,,,,,,,,,,,,,8728a798-202f-450f-888a-bf869a8b776c
+35e6a30b-7118-4e05-bd17-7840b45a3515,course,2º,55a1404f-3bfc-443b-b572-8ce3e24f3552,1.0,1,,,,,,,,,,,,,,,55a1404f-3bfc-443b-b572-8ce3e24f3552,
+f51bee74-2656-4af6-afc2-71b2d6987e17,coursegroup,81,35e6a30b-7118-4e05-bd17-7840b45a3515,1.0,1,,,,,,,,,,,,,,,,35e6a30b-7118-4e05-bd17-7840b45a3515
+6129161a-01bb-4a36-87aa-b489fffe1647,coursegroup,82,35e6a30b-7118-4e05-bd17-7840b45a3515,1.0,1,,,,,,,,,,,,,,,,35e6a30b-7118-4e05-bd17-7840b45a3515
+42d96335-1d52-4922-aeb9-15ebe9409b98,course,3º,55a1404f-3bfc-443b-b572-8ce3e24f3552,1.0,1,,,,,,,,,,60,,,,,55a1404f-3bfc-443b-b572-8ce3e24f3552,
+4ae3964b-e2ac-46d3-bf50-b222fdfd8a23,coursegroup,81,42d96335-1d52-4922-aeb9-15ebe9409b98,1.0,1,,,,,,,,,,,,,,,,42d96335-1d52-4922-aeb9-15ebe9409b98
+f2ae7ffc-17fc-477e-915f-2129879e214d,coursegroup,82,42d96335-1d52-4922-aeb9-15ebe9409b98,1.0,1,,,,,,,,,,,,,,,,42d96335-1d52-4922-aeb9-15ebe9409b98
+639126fd-9381-486e-8dea-30356ac50d5c,course,4º,55a1404f-3bfc-443b-b572-8ce3e24f3552,1.0,1,,,,,,,,,,,,,,,55a1404f-3bfc-443b-b572-8ce3e24f3552,
+0fec8093-e1c4-402f-9345-1af4c3faeb79,coursegroup,DP-PSIV-GESTIO,639126fd-9381-486e-8dea-30356ac50d5c,1.0,1,,,,,,,,,,,,,,,,639126fd-9381-486e-8dea-30356ac50d5c
+8cc5be72-c8d8-4276-a9c9-a576ab930aed,coursegroup,PRIV-EGRA-TIC,639126fd-9381-486e-8dea-30356ac50d5c,1.0,1,,,,,,,,,,,,,,,,639126fd-9381-486e-8dea-30356ac50d5c
+65e04075-f759-48be-a68d-a4564b36fe3c,spacegroup,QC,6ed72aab-42fb-4687-98d0-3ac798ee13b5,1.0,1,,,,,,,,,,,,,,,,
+2bddc102-ace4-4710-9118-5f868e74cdd2,space,Seminario A,65e04075-f759-48be-a68d-a4564b36fe3c,1.0,,20,classroom,0,,,0.0,0.0,,,,,,,,,
+b44d6cd5-d8e9-4861-af60-2f52156909ed,space,Seminario B,65e04075-f759-48be-a68d-a4564b36fe3c,1.0,,20,classroom,0,,,0.0,0.0,,,,,,,,,
+704131ad-d2ea-4376-96d7-2f59d03f289c,space,Seminario C,65e04075-f759-48be-a68d-a4564b36fe3c,1.0,,20,classroom,0,,,0.0,0.0,,,,,,,,,
+9e92c2d5-915d-4761-a082-6f1d15cd9991,career,Enginyeria Química,6ed72aab-42fb-4687-98d0-3ac798ee13b5,1.0,0,,,,,,,,60,,,,,,,,
+868466b3-8e14-45de-aa8e-00c99edc3563,course,1º,9e92c2d5-915d-4761-a082-6f1d15cd9991,1.0,1,,,,,,,,,,,,,,,9e92c2d5-915d-4761-a082-6f1d15cd9991,
+ce824aa8-d374-4923-91b2-1653d1569566,course,2º,9e92c2d5-915d-4761-a082-6f1d15cd9991,1.0,1,,,,,,,,,,,,,,,9e92c2d5-915d-4761-a082-6f1d15cd9991,
+7d667f58-153f-4743-ace5-ca2dc9b53b11,coursegroup,211,ce824aa8-d374-4923-91b2-1653d1569566,1.0,1,,,,,,,,,,,,,,,,ce824aa8-d374-4923-91b2-1653d1569566
+cb7459e9-6831-4f8e-abf5-5c9cd211687b,coursegroup,212,ce824aa8-d374-4923-91b2-1653d1569566,1.0,1,,,,,,,,,,,,,,,,ce824aa8-d374-4923-91b2-1653d1569566
+88fba02a-ee42-4293-b42b-14c359d1772a,course,3º,9e92c2d5-915d-4761-a082-6f1d15cd9991,1.0,1,,,,,,,,,,,,,,,9e92c2d5-915d-4761-a082-6f1d15cd9991,
+f3bfa5a3-e19a-4745-932e-4a793e8e8cdb,course,4º,9e92c2d5-915d-4761-a082-6f1d15cd9991,1.0,1,,,,,,,,,,,,,,,9e92c2d5-915d-4761-a082-6f1d15cd9991,

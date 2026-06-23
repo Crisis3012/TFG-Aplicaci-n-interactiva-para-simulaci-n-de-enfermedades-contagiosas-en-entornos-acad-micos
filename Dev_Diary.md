@@ -42,3 +42,6 @@
 
 - Versión 0.1.6:
     Se ha creado la parte visual de la simulacion, con movimiento de personas, avisos en contagios y una pequeña visualizacion general a la dercha, falta añadir grafos concretos y generales en tiempo real en funcion de los resultados para dar más info al usuario. Los colores de las personas moviendose representan el estado de los estudiantes en el grupo. Ahora mismo tenemos esto: S = susceptible = azul, E = exposed = amarillo, I = infectious = rojo, R = recovered = verde. 
+
+- Versión 0.2.0:
+    Se ha arreglado la muestra de eventos en la simulación en vivo y se ha arreglado un bug que hacía que los alumnos de un curso se añadieran diectamente a todos sus grupos en vez de repartirse entre ellos (duplicando o triplicando los alumnos de la universidad). Con esto damos como terminada la primera versión completa del apartado de simulación y preparamos la aplicación para incorporar la parte final de visualización de datos. Futuros ajustes a la simulación se contemplaran como mejoras de la infraestructura ya existente, permitiendo así ya el avance a la sigiente versión de la aplicación y entrando en la recta final con el 0.2.x.

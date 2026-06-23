@@ -20,7 +20,7 @@ from backend.simulation.contact_model import ContactModel
 from backend.simulation.disease import DiseaseState
 from backend.simulation.event import SimulationEvent, ActivityType
 from backend.simulation.event_planner import EventPlanner, IdlePeriod
-from backend.simulation.faculty_adapter import (
+from outdated.faculty_adapter_old import (
     FacultySimulationAdapter,
     FacultySimulationData,
     AcademicGroupContext,
@@ -685,8 +685,6 @@ class SimulationEngine:
             if agent is None:
                 continue
 
-            target_label = self._format_agent_academic_label(agent.agent_id)
-
             events.append(
                 VisualEvent(
                     event_type="initial_infection",
@@ -694,8 +692,6 @@ class SimulationEngine:
                     visual_offset=0.0,
                     target_agent_id=agent.agent_id,
                     data={
-                        "display_text": f"Infección inicial: {target_label}",
-                        "target_label": target_label,
                         "state": agent.state.value,
                         "academic_group_id": agent.academic_group_id,
                         "course_uuid": agent.course_uuid,
@@ -721,14 +717,6 @@ class SimulationEngine:
         visual_events: list[VisualEvent] = []
 
         for infection in infection_events:
-            source_label = self._format_agent_academic_label(
-                infection.source_agent_id
-            )
-            target_label = self._format_agent_academic_label(
-                infection.infected_agent_id
-            )
-            space_label = self._format_space_label(infection.space_uuid)
-
             visual_events.append(
                 VisualEvent(
                     event_type="infection",
@@ -739,13 +727,6 @@ class SimulationEngine:
                     target_agent_id=infection.infected_agent_id,
                     related_event_id=infection.event_id,
                     data={
-                        "display_text": (
-                            f"{source_label} contagia a {target_label} "
-                            f"en {space_label}"
-                        ),
-                        "source_label": source_label,
-                        "target_label": target_label,
-                        "space_label": space_label,
                         "infection_id": infection.infection_id,
                         "transmission_probability": infection.transmission_probability,
                         "infection_chain_id": infection.infection_chain_id,
@@ -754,62 +735,6 @@ class SimulationEngine:
             )
 
         return visual_events
-
-    def _format_agent_academic_label(
-        self,
-        agent_id: Optional[str],
-    ) -> str:
-        if not agent_id:
-            return "Origen externo"
-
-        agent = self.agents_by_id.get(agent_id)
-
-        if agent is None:
-            return str(agent_id)
-
-        if self.data is None:
-            return agent.agent_id
-
-        group_context = self.data.group_contexts.get(agent.academic_group_id)
-
-        if group_context is None:
-            return agent.agent_id
-
-        label_parts = [
-            group_context.career_name,
-            group_context.course_name,
-        ]
-
-        if not group_context.is_virtual_group:
-            label_parts.append(group_context.group_name)
-
-        clean_parts = [
-            str(part)
-            for part in label_parts
-            if part is not None and str(part).strip()
-        ]
-
-        if not clean_parts:
-            return agent.agent_id
-
-        return ", ".join(clean_parts)
-
-    def _format_space_label(
-        self,
-        space_uuid: Optional[str],
-    ) -> str:
-        if not space_uuid:
-            return "espacio desconocido"
-
-        if self.data is None:
-            return str(space_uuid)
-
-        space_context = self.data.space_contexts.get(space_uuid)
-
-        if space_context is None:
-            return str(space_uuid)
-
-        return space_context.space_name or str(space_uuid)
 
     def _record_visual_locations(
         self,

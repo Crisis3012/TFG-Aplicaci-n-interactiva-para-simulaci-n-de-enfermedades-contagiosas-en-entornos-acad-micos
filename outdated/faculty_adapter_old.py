@@ -204,18 +204,11 @@ class FacultySimulationAdapter:
             course_groups = self._get_course_groups_for_course(course)
 
             if course_groups:
-                student_counts_by_group = self._resolve_student_counts_for_course_groups(
-                    course_groups=course_groups,
-                    course=course,
-                    career=career,
-                )
-
                 for group in course_groups:
                     context = self._build_context_for_course_group(
                         group=group,
                         course=course,
                         career=career,
-                        number_of_students=student_counts_by_group.get(group.uuid, 0),
                     )
                     contexts[context.academic_group_id] = context
             else:
@@ -232,14 +225,12 @@ class FacultySimulationAdapter:
         group: CourseGroup,
         course: Course,
         career: Optional[Career],
-        number_of_students: Optional[int] = None,
     ) -> AcademicGroupContext:
-        if number_of_students is None:
-            number_of_students = self._resolve_number_of_students(
-                group=group,
-                course=course,
-                career=career,
-            )
+        number_of_students = self._resolve_number_of_students(
+            group=group,
+            course=course,
+            career=career,
+        )
 
         attendance_rate = self._resolve_attendance_rate(
             group=group,
@@ -318,85 +309,6 @@ class FacultySimulationAdapter:
         )
 
         return self.DEFAULT_STUDENTS_PER_GROUP
-
-    def _resolve_student_counts_for_course_groups(
-        self,
-        course_groups: list[CourseGroup],
-        course: Course,
-        career: Optional[Career],
-    ) -> dict[str, int]:
-        """
-        Resuelve cuántos estudiantes tiene cada grupo de un curso.
-
-        Si el usuario define estudiantes directamente en un grupo, ese valor
-        se respeta como override. Los grupos sin valor propio se reparten el
-        total del curso o, si el curso no lo define, el valor medio de la
-        carrera.
-        """
-
-        explicit_counts: dict[str, int] = {}
-        unspecified_groups: list[CourseGroup] = []
-
-        for group in course_groups:
-            if group.number_of_students is not None:
-                explicit_counts[group.uuid] = max(0, int(group.number_of_students))
-            else:
-                unspecified_groups.append(group)
-
-        if not unspecified_groups:
-            return explicit_counts
-
-        total_students = self._resolve_course_total_students(
-            course=course,
-            career=career,
-        )
-
-        if total_students is None:
-            for group in unspecified_groups:
-                explicit_counts[group.uuid] = self.DEFAULT_STUDENTS_PER_GROUP
-
-            self.warnings.append(
-                f"No se ha definido número de estudiantes para el curso '{course.name}' "
-                f"ni para su carrera. Se usará el valor por defecto "
-                f"({self.DEFAULT_STUDENTS_PER_GROUP}) en cada grupo sin valor propio."
-            )
-
-            return explicit_counts
-
-        explicitly_assigned = sum(explicit_counts.values())
-        remaining_students = total_students - explicitly_assigned
-
-        if remaining_students < 0:
-            self.warnings.append(
-                f"Los grupos del curso '{course.name}' tienen más estudiantes "
-                f"asignados explícitamente ({explicitly_assigned}) que el total "
-                f"del curso/carrera ({total_students}). Los grupos sin valor propio "
-                f"recibirán 0 estudiantes."
-            )
-            remaining_students = 0
-
-        distributed_counts = self._distribute_evenly(
-            total=remaining_students,
-            parts=len(unspecified_groups),
-        )
-
-        for group, count in zip(unspecified_groups, distributed_counts):
-            explicit_counts[group.uuid] = count
-
-        return explicit_counts
-
-    def _resolve_course_total_students(
-        self,
-        course: Course,
-        career: Optional[Career],
-    ) -> Optional[int]:
-        if course.number_of_students is not None:
-            return max(0, int(course.number_of_students))
-
-        if career is not None and career.students_by_year is not None:
-            return max(0, int(career.students_by_year))
-
-        return None
 
     def _resolve_attendance_rate(
         self,
@@ -715,20 +627,6 @@ class FacultySimulationAdapter:
     @staticmethod
     def _get_virtual_group_id(course_uuid: str) -> str:
         return f"virtual_group_for_course_{course_uuid}"
-
-    @staticmethod
-    def _distribute_evenly(total: int, parts: int) -> list[int]:
-        if parts <= 0:
-            return []
-
-        safe_total = max(0, int(total))
-        base = safe_total // parts
-        remainder = safe_total % parts
-
-        return [
-            base + (1 if index < remainder else 0)
-            for index in range(parts)
-        ]
 
     @staticmethod
     def _safe_id(raw_id: str) -> str:

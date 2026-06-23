@@ -42,3 +42,10 @@ BUILDER CHANGES TO APPLY:
     - Cambiar el color del borde del grupo si estan expandidos o contraidos
     - Que al pulsar enter se guarde el estado de la entidad y se pase a la siguiente casilla de escritura
     - Hacer que los errores en vez de en la consola se muestren como avisos en la pantalla del biulder
+
+VISUALITZACIONS:
+    - Distribució de contagis per hora
+    - distribucio de la gent per hora
+    - normalitzar els contagis amb els alumnes presents
+    - quantificar quins grups d'estudiants contagien a més grups
+    - normalitzar segons el numero de contactes
