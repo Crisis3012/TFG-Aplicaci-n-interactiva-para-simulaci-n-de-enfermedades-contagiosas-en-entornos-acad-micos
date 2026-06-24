@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 from typing import Optional
+import shutil
 
 from backend.faculty import Faculty
 
@@ -203,3 +204,29 @@ class FacultyProjectManager:
             return Faculty.load_from_folder(faculty_path), faculty_name
 
         return self.ensure_default_faculty()
+    
+    # ============================================================
+    # Eliminar 
+    # ============================================================
+
+    def delete_faculty(self, faculty_name: str) -> None:
+        faculty_path = self.get_faculty_path(faculty_name)
+
+        if not faculty_path.exists():
+            raise FileNotFoundError(f"No existe la facultad: {faculty_name}")
+
+        if not faculty_path.is_dir():
+            raise ValueError("La ruta de la facultad no es una carpeta.")
+
+        shutil.rmtree(faculty_path)
+
+        active_path = self.get_active_faculty_path()
+
+        if active_path is not None and active_path.resolve() == faculty_path.resolve():
+            remaining_faculties = self.list_faculties()
+
+            if remaining_faculties:
+                new_active_path = self.get_faculty_path(remaining_faculties[0])
+                self.set_active_faculty_path(new_active_path)
+            else:
+                self.clear_active_faculty_path()

@@ -255,7 +255,7 @@ class SimulationController:
             storage = self.get_storage()
             saved_path = storage.save_batch(
                 batch_result=result,
-                save_individual_runs=save_individual_runs,
+                save_individual_runs=True,
             )
 
         return SimulationExecutionResponse(

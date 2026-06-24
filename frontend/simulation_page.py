@@ -190,8 +190,8 @@ class SimulationPage(QWidget):
         self.batch_seed_input = QLineEdit()
         self.batch_seed_input.setPlaceholderText("Opcional, ej. 3012")
 
-        self.save_individual_runs_checkbox = QCheckBox("Guardar ejecuciones individuales")
-        self.save_individual_runs_checkbox.setChecked(True)
+        # self.save_individual_runs_checkbox = QCheckBox("Guardar ejecuciones individuales")
+        # self.save_individual_runs_checkbox.setChecked(True)
 
         batch_layout.addWidget(self.batch_enabled_checkbox, 0, 0, 1, 2)
 
@@ -201,7 +201,7 @@ class SimulationPage(QWidget):
         batch_layout.addWidget(QLabel("Semilla del batch:"), 2, 0)
         batch_layout.addWidget(self.batch_seed_input, 2, 1)
 
-        batch_layout.addWidget(self.save_individual_runs_checkbox, 3, 0, 1, 2)
+        # batch_layout.addWidget(self.save_individual_runs_checkbox, 3, 0, 1, 2)
 
         batch_group.setLayout(batch_layout)
         main_layout.addWidget(batch_group)
@@ -356,7 +356,7 @@ class SimulationPage(QWidget):
             config=config,
             progress_callback=self._on_batch_progress,
             save_results=True,
-            save_individual_runs=self.save_individual_runs_checkbox.isChecked(),
+            save_individual_runs=True,
             generate_visual_trace=generate_visual_trace,
         )
 
@@ -542,7 +542,7 @@ class SimulationPage(QWidget):
 
         self.batch_runs_spin.setEnabled(batch_enabled)
         self.batch_seed_input.setEnabled(batch_enabled)
-        self.save_individual_runs_checkbox.setEnabled(batch_enabled)
+        #self.save_individual_runs_checkbox.setEnabled(batch_enabled)
 
         if hasattr(self, "generate_visual_trace_checkbox"):
             self.generate_visual_trace_checkbox.setEnabled(not batch_enabled)

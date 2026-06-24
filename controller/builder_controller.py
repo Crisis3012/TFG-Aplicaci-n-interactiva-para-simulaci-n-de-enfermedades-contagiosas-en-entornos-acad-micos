@@ -599,6 +599,23 @@ class BuilderController:
 
         self.refresh_all()
 
+    def delete_faculty_project(self, faculty_name: str) -> None:
+        if not faculty_name:
+            return
+
+        try:
+            self.project_manager.delete_faculty(faculty_name)
+
+            faculty, active_name = self.project_manager.load_active_or_create_default()
+            self.faculty = faculty
+            self.active_faculty_name = active_name
+            self.selected_node_uuid = None
+
+            self.refresh_all()
+
+        except Exception as exc:
+            self._show_error(f"No se ha podido borrar la facultad '{faculty_name}': {exc}")
+
     # -------------------------
     # CONTENEDORES / EXPANSIÓN
     # -------------------------

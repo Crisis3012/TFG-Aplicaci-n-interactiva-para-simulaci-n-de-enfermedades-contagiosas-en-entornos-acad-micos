@@ -48,3 +48,6 @@
 
 - Versión 0.2.1:
     Se ha creado la página de visualización y se ha cambiado el guardado de resultados para adaptarlo a todas las visualizaciones a extraer. Se ha roto la simulación en el proceso pero debería poder arreglarse fácilmente. También se han eliminado las simulaciones de Pruebas_1 para más claredad al trabajar desde el visualizador. 
+
+- Versión 1.0.0:
+    Se han hecho todas las visualizaciones, adaptadas a ejecuciones individuales y a batches. Se ha añadido un botón para eliminar facultades y se han arreglado un poco las burbujas de la simulacion visual. Con esto se finaliza la primera versión de la aplicación y concluye el desarrollo antes de la entrega final. 

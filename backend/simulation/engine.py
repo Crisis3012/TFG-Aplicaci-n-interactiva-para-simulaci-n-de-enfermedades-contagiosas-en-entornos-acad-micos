@@ -139,13 +139,6 @@ class SimulationEngine:
             new_infections=0,
         )
 
-        self._record_occupancy(
-            slot=start_slot,
-            day_index=day_index,
-            planned_events=planned_events,
-            infection_events=slot_infection_events,
-        )
-
         if self.generate_visual_trace:
             initial_visual_events = self._build_initial_visual_events(
                 current_slot=0,
@@ -222,6 +215,13 @@ class SimulationEngine:
                 self._record_time_series(
                     slot=start_slot,
                     new_infections=new_infections,
+                )
+
+                self._record_occupancy(
+                    slot=start_slot,
+                    day_index=day_index,
+                    planned_events=planned_events,
+                    infection_events=slot_infection_events,
                 )
 
                 if self.generate_visual_trace:

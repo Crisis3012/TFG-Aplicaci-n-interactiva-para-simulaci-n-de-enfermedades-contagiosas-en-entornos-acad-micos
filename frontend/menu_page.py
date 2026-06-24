@@ -4,6 +4,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
+from PySide6.QtWidgets import QMessageBox
 
 
 class MenuPage(QWidget):
@@ -38,9 +39,26 @@ class MenuPage(QWidget):
         self.new_faculty_button.setFixedSize(150, 35)
         self.new_faculty_button.clicked.connect(self._create_new_faculty)
 
+        self.delete_faculty_button = QPushButton("Borrar facultad")
+        self.delete_faculty_button.setFixedSize(150, 35)
+        self.delete_faculty_button.setStyleSheet("""
+            QPushButton {
+                background-color: #c62828;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-weight: 600;
+            }
+            QPushButton:hover {
+                background-color: #b71c1c;
+            }
+        """)
+        self.delete_faculty_button.clicked.connect(self._delete_selected_faculty)
+
         top_layout.addWidget(QLabel("Facultad:"))
         top_layout.addWidget(self.faculty_selector)
         top_layout.addWidget(self.new_faculty_button)
+        top_layout.addWidget(self.delete_faculty_button)
 
         center_layout = QVBoxLayout()
         center_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -149,4 +167,40 @@ class MenuPage(QWidget):
             return
 
         self.builder_controller.create_new_faculty_project(name)
+        self.refresh_faculty_selector()
+
+    def _delete_selected_faculty(self):
+        faculty_name = self.faculty_selector.currentText().strip()
+
+        if not faculty_name:
+            return
+
+        box = QMessageBox(self)
+        box.setIcon(QMessageBox.Icon.Warning)
+        box.setWindowTitle("Borrar facultad")
+        box.setText(f"¿Seguro que quieres borrar la facultad '{faculty_name}'?")
+        box.setInformativeText("Esta acción eliminará la facultad y sus resultados guardados.")
+        box.setStandardButtons(QMessageBox.StandardButton.No)
+
+        yes_button = box.addButton("Sí, borrar", QMessageBox.ButtonRole.DestructiveRole)
+        yes_button.setStyleSheet("""
+            QPushButton {
+                background-color: #c62828;
+                color: white;
+                border: none;
+                border-radius: 6px;
+                padding: 6px 12px;
+                font-weight: 600;
+            }
+            QPushButton:hover {
+                background-color: #b71c1c;
+            }
+        """)
+
+        box.exec()
+
+        if box.clickedButton() != yes_button:
+            return
+
+        self.builder_controller.delete_faculty_project(faculty_name)
         self.refresh_faculty_selector()

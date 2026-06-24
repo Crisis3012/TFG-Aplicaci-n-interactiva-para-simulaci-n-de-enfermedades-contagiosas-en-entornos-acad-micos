@@ -65,7 +65,7 @@ class GraphView(QGraphicsView):
         self.nodes_by_uuid = {}
         self.node_positions = {}
 
-        self.min_zoom = 0.2
+        self.min_zoom = 0.05
         self.max_zoom = 4.0
 
         self._panning = False

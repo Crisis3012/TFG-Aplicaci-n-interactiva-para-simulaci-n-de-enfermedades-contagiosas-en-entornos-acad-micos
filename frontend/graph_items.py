@@ -57,7 +57,7 @@ class BaseGraphNodeItem(QGraphicsObject):
         self.selected_pen = QPen(QColor("#e74c3c"), 4)
         self.text_pen = QPen(QColor("#111827"))
 
-        self.font = QFont("Arial", 10, QFont.Weight.Bold)
+        self.font = QFont("Arial", 15, QFont.Weight.Bold)
 
     def boundingRect(self):
         return QRectF(-50, -50, 100, 100)
@@ -100,6 +100,7 @@ class RootNodeItem(BaseGraphNodeItem):
         super().__init__(node_uuid, name, size, expanded=expanded)
         self.width = self.size * 1.8
         self.height = self.size * 0.9
+        self.fill_color = "#4fa3a5"
 
     def boundingRect(self):
         return QRectF(
@@ -114,7 +115,7 @@ class RootNodeItem(BaseGraphNodeItem):
 
         rect = self.boundingRect()
 
-        painter.setBrush(QBrush(QColor("#4fa3a5")))
+        painter.setBrush(QBrush(QColor(self.fill_color)))
         painter.setPen(self._current_pen())
         painter.drawRect(rect)
 
@@ -159,6 +160,7 @@ class SpaceNodeItem(BaseGraphNodeItem):
         super().__init__(node_uuid, name, size, expanded=expanded)
         self.width = self.size * 1.7
         self.height = self.size * 0.85
+        self.fill_color = "#d7dde5"
 
     def boundingRect(self):
         return QRectF(
@@ -173,7 +175,7 @@ class SpaceNodeItem(BaseGraphNodeItem):
 
         rect = self.boundingRect()
 
-        painter.setBrush(QBrush(QColor("#d7dde5")))
+        painter.setBrush(QBrush(QColor(self.fill_color)))
         painter.setPen(self._current_pen())
         painter.drawRoundedRect(rect, 16, 16)
 

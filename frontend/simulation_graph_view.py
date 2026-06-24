@@ -71,12 +71,12 @@ class SimulationBubbleItem(QGraphicsObject):
 
         painter.setBrush(QBrush(self.background))
         painter.setPen(QPen(self.border, 2))
-        painter.drawRoundedRect(rect, 10, 10)
+        painter.drawRoundedRect(rect, 8, 8)
 
         painter.setPen(QPen(self.text_color))
         painter.setFont(self.font)
         painter.drawText(
-            rect.adjusted(8, 6, -8, -6),
+            rect.adjusted(5, 3, -5, -3),
             Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter,
             self.text,
         )
@@ -272,7 +272,7 @@ class SimulationGraphView(QGraphicsView):
         self.current_faculty: Optional[Faculty] = None
         self.current_frame: Optional[dict[str, Any]] = None
 
-        self.min_zoom = 0.2
+        self.min_zoom = 0.05
         self.max_zoom = 4.0
 
         self._panning = False
@@ -544,6 +544,29 @@ class SimulationGraphView(QGraphicsView):
 
                 self.scene_obj.addItem(marker)
 
+    def _update_overlay_visibility(self) -> None:
+        zoom = self.transform().m11()
+
+        show_bubbles = zoom >= 0.25
+        show_labels = zoom >= 0.22
+
+        for item in self.scene_obj.items():
+            if isinstance(item, SimulationBubbleItem):
+                item.setVisible(show_bubbles)
+
+                if zoom < 0.35:
+                    item.setScale(0.75)
+                elif zoom < 0.60:
+                    item.setScale(0.85)
+                else:
+                    item.setScale(1.0)
+
+            elif isinstance(item, InfectionMarkerItem):
+                item.setVisible(True)
+
+            elif hasattr(item, "label_item"):
+                item.label_item.setVisible(show_labels)
+
     def _get_infection_space_uuids(
         self,
         frame: dict[str, Any],
@@ -694,6 +717,7 @@ class SimulationGraphView(QGraphicsView):
             animation.stop()
 
         self.agent_animations.clear()
+        self._update_overlay_visibility()
 
     def _add_agent_movements(
         self,
@@ -1002,6 +1026,8 @@ class SimulationGraphView(QGraphicsView):
             if current_scale > self.min_zoom:
                 factor = max(zoom_out_factor, self.min_zoom / current_scale)
                 self.scale(factor, factor)
+
+        self._update_overlay_visibility()
 
         event.accept()
 
