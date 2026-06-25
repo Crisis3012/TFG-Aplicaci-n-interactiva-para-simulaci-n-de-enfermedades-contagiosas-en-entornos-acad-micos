@@ -1,4 +1,5 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QStackedWidget
+from PySide6.QtGui import QGuiApplication
 
 from frontend.menu_page import MenuPage
 from frontend.builder_page import BuilderPage
@@ -20,7 +21,21 @@ class MainWindow(QWidget):
         )
 
         self.setWindowTitle("TFG")
-        self.resize(1200, 760)
+        screen = QGuiApplication.primaryScreen()
+        available = screen.availableGeometry() if screen else None
+
+        if available is not None:
+            width = min(1200, int(available.width() * 0.95))
+            height = min(760, int(available.height() * 0.90))
+            self.resize(width, height)
+
+            x = available.x() + (available.width() - width) // 2
+            y = available.y() + (available.height() - height) // 2
+            self.move(x, y)
+        else:
+            self.resize(1100, 700)
+
+        self.setMinimumSize(900, 560)
 
         self.stacked = QStackedWidget()
 

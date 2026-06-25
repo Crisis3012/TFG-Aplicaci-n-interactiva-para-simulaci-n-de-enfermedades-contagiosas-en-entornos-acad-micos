@@ -1456,7 +1456,7 @@ class VisualizationPage(QWidget):
 
         self.faculty_summary_text = QTextEdit()
         self.faculty_summary_text.setReadOnly(True)
-        self.faculty_summary_text.setMaximumHeight(190)
+        self.faculty_summary_text.setMaximumHeight(140)
         faculty_layout.addWidget(self.faculty_summary_text)
 
         self.faculty_usage_chart = VerticalBarChartWidget(
@@ -1728,7 +1728,14 @@ class VisualizationPage(QWidget):
         # Montaje final
         # -------------------------
 
-        self.splitter.addWidget(self.faculty_panel)
+        self.faculty_scroll = QScrollArea()
+        self.faculty_scroll.setWidgetResizable(True)
+        self.faculty_scroll.setWidget(self.faculty_panel)
+        self.faculty_scroll.setMinimumWidth(360)
+        self.faculty_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        self.faculty_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+
+        self.splitter.addWidget(self.faculty_scroll)
         self.splitter.addWidget(self.results_panel)
         self.splitter.setSizes([390, 810])
         self.splitter.setStretchFactor(0, 0)

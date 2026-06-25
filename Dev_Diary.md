@@ -51,3 +51,6 @@
 
 - Versión 1.0.0:
     Se han hecho todas las visualizaciones, adaptadas a ejecuciones individuales y a batches. Se ha añadido un botón para eliminar facultades y se han arreglado un poco las burbujas de la simulacion visual. Con esto se finaliza la primera versión de la aplicación y concluye el desarrollo antes de la entrega final. 
+
+- Versión 1.0.1: 
+    Se han incorporado controles de tamaño para que la aplicación funcione correctamente en pantallas pequeñas, para poder trabajar desde el portátil sin tener que que hacer malabares.

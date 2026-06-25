@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QSplitter, QFrame, QHBoxLayout,
-    QPushButton, QMessageBox
+    QPushButton, QMessageBox, QScrollArea
 )
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QShortcut, QKeySequence
@@ -37,6 +37,17 @@ class BuilderPage(QWidget):
 
         self.tree_panel = BuilderTreePanel()
         self.properties_panel = BuilderPropertiesPanel()
+
+        self.properties_scroll = QScrollArea()
+        self.properties_scroll.setWidgetResizable(True)
+        self.properties_scroll.setWidget(self.properties_panel)
+        self.properties_scroll.setMinimumWidth(220)
+        self.properties_scroll.setStyleSheet("""
+            QScrollArea {
+                border: none;
+                background-color: transparent;
+            }
+        """)
 
         # Centro con barra superior + grafo
         self.center_panel = QFrame()
@@ -128,12 +139,16 @@ class BuilderPage(QWidget):
         self.tree_panel.setMinimumWidth(180)
         self.center_panel.setMinimumWidth(250)
         self.properties_panel.setMinimumWidth(220)
+        self.properties_scroll.setMinimumWidth(240)
+
+        self.properties_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        self.properties_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
 
         self.splitter.addWidget(self.tree_panel)
         self.splitter.addWidget(self.center_panel)
-        self.splitter.addWidget(self.properties_panel)
+        self.splitter.addWidget(self.properties_scroll)
 
-        self.splitter.setSizes([240, 620, 280])
+        self.splitter.setSizes([210, 620, 320])
         self.splitter.setStretchFactor(0, 0)
         self.splitter.setStretchFactor(1, 1)
         self.splitter.setStretchFactor(2, 0)
