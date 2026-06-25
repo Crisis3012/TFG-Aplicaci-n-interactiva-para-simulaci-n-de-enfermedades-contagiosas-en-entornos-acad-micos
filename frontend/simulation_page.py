@@ -20,6 +20,7 @@ from PySide6.QtWidgets import (
     QTextEdit,
     QMessageBox,
     QApplication,
+    QScrollArea,
 )
 
 from backend.simulation.config import (
@@ -237,12 +238,26 @@ class SimulationPage(QWidget):
 
         self.output_text = QTextEdit()
         self.output_text.setReadOnly(True)
-        self.output_text.setMinimumHeight(180)
+        self.output_text.setMinimumHeight(120)
 
         main_layout.addWidget(self.progress_bar)
         main_layout.addWidget(self.output_text)
 
-        self.setLayout(main_layout)
+        content_widget = QWidget()
+        content_widget.setLayout(main_layout)
+
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setWidget(content_widget)
+        scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+
+        page_layout = QVBoxLayout()
+        page_layout.setContentsMargins(0, 0, 0, 0)
+        page_layout.setSpacing(0)
+        page_layout.addWidget(scroll)
+
+        self.setLayout(page_layout)
 
         self._update_batch_controls()
 
