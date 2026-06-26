@@ -56,4 +56,7 @@
     Se han incorporado controles de tamaño para que la aplicación funcione correctamente en pantallas pequeñas, para poder trabajar desde el portátil sin tener que que hacer malabares.
 
 - Versión 1.0.1a: 
-    Mínimo reajuste del cambio para tambien aplicarlo a la pantalla de simulación
+    Mínimo reajuste del cambio para tambien aplicarlo a la pantalla de simulación.
+
+- Versión 1.0.1b:
+    Cambio del título dentro de la aplicación y añadimos el informe final a la documentación.

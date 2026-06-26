@@ -64,7 +64,7 @@ class MenuPage(QWidget):
         center_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         center_layout.setSpacing(18)
 
-        title = QLabel("TFG")
+        title = QLabel("Simulador de enfermedades en entorno académico")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         title.setFont(QFont("Arial", 30, QFont.Weight.Bold))
 
