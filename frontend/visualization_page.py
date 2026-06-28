@@ -25,6 +25,7 @@ from PySide6.QtWidgets import (
     QComboBox,
     QTextEdit,
     QMessageBox,
+    QSizePolicy,
 )
 from frontend.graph_items import (
     BaseGraphNodeItem,
@@ -1423,6 +1424,12 @@ class VisualizationPage(QWidget):
         self.active_faculty_label = QLabel()
         self.active_faculty_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.active_faculty_label.setStyleSheet("font-size: 13px; color: #555;")
+        self.active_faculty_label.setWordWrap(False)
+        self.active_faculty_label.setMaximumHeight(24)
+        self.active_faculty_label.setSizePolicy(
+            QSizePolicy.Policy.Preferred,
+            QSizePolicy.Policy.Fixed,
+        )
         main_layout.addWidget(self.active_faculty_label)
 
         # -------------------------

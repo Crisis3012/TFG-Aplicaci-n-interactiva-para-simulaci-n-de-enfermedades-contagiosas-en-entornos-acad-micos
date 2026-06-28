@@ -60,3 +60,6 @@
 
 - Versión 1.0.1b:
     Cambio del título dentro de la aplicación y añadimos el informe final a la documentación.
+
+- Versión 1.0.2:
+    Se ha solucionado un problema visual en el apartado de visualización y se ha añadido un readme al repositorio.

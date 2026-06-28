@@ -26,7 +26,6 @@ cd6cdee8-57ae-4a9d-b005-4cf5cf1204c2,spacegroup,Q3,6ed72aab-42fb-4687-98d0-3ac79
 d96180fe-7402-44d1-a2e5-ebe6ae59138b,space,Q3/0003,83518492-c138-485d-98f8-0fdd20f1c772,1.0,,60,classroom,0,,,0.0,0.0,,,,,,,,,
 2a600a64-cbb6-4f23-ae2a-6b045b08e650,space,Laboratori integrat d'informàtica 6,83518492-c138-485d-98f8-0fdd20f1c772,1.0,,15,lab,0,,,0.0,0.0,,,,,,,,,
 25b5654f-fa95-4c48-b36a-91d56f1197a4,space,Q3/0009,83518492-c138-485d-98f8-0fdd20f1c772,1.0,,30,classroom,0,,,0.0,0.0,,,,,,,,,
-cc94501b-15e7-44bf-bf29-5c89a5e261b7,space,Q3/0011,83518492-c138-485d-98f8-0fdd20f1c772,1.0,,30,classroom,0,,,0.0,0.0,,,,,,,,,
 5f49da97-1495-4ffb-b632-c0f7ddcb18e7,space,Q3/0011,83518492-c138-485d-98f8-0fdd20f1c772,1.0,,30,classroom,0,,,0.0,0.0,,,,,,,,,
 2623d1e9-0fcb-492c-8061-212848dc667a,space,Q3/0013,83518492-c138-485d-98f8-0fdd20f1c772,1.0,,60,classroom,0,,,0.0,0.0,,,,,,,,,
 1c4bf824-c1b6-46e3-a935-c27ad6a7fc4d,spacegroup,Q3/1,cd6cdee8-57ae-4a9d-b005-4cf5cf1204c2,1.0,1,,,,,,,,,,,,,,,,
@@ -59,6 +58,7 @@ ea0a4ff4-c420-4411-86ab-a48d873af43a,space,Q5/1011,aa5b5cf1-839b-49c8-ad3e-1404d
 e197880e-b0ca-4217-8168-3f93ebf2d9c6,space,Q5/2007,69427175-afa2-422c-bcd2-7fc4fd97e6a5,1.0,,20,lab,0,,,0.0,0.0,,,,,,,,,
 a4424b7f-869c-447b-a8eb-b230cd51126c,space,Unitat de combinatoria i comunicació digital,69427175-afa2-422c-bcd2-7fc4fd97e6a5,1.0,,20,lab,0,,,0.0,0.0,,,,,,,,,
 0b893a7d-b137-466d-8eb5-1f1510140a57,space,Q5/2009,69427175-afa2-422c-bcd2-7fc4fd97e6a5,1.0,,20,lab,0,,,0.0,0.0,,,,,,,,,
+80702252-9e46-446a-a072-d3741e23a322,space,Q5/2008 - Laboratori docent CCD,69427175-afa2-422c-bcd2-7fc4fd97e6a5,1.0,,30,lab,0,,,0.0,0.0,,,,,,,,,
 02c181d2-200f-476c-9e51-a361b46cb2f3,spacegroup,Q6,6ed72aab-42fb-4687-98d0-3ac798ee13b5,1.0,1,,,,,,,,,,,,,,,,
 555613d4-4c3c-485e-89e6-1747c81e53d4,spacegroup,Q6/0,02c181d2-200f-476c-9e51-a361b46cb2f3,1.0,1,,,,,,,,,,,,,,,,
 3bdd5e7b-1d69-4379-9d73-0a69127c8f48,space,Laboratori d'enginyeria química A,555613d4-4c3c-485e-89e6-1747c81e53d4,1.0,,45,lab,0,,,0.0,0.0,,,,,,,,,
@@ -90,6 +90,7 @@ f2ae7ffc-17fc-477e-915f-2129879e214d,coursegroup,82,42d96335-1d52-4922-aeb9-15eb
 2bddc102-ace4-4710-9118-5f868e74cdd2,space,Seminario A,65e04075-f759-48be-a68d-a4564b36fe3c,1.0,,20,classroom,0,,,0.0,0.0,,,,,,,,,
 b44d6cd5-d8e9-4861-af60-2f52156909ed,space,Seminario B,65e04075-f759-48be-a68d-a4564b36fe3c,1.0,,20,classroom,0,,,0.0,0.0,,,,,,,,,
 704131ad-d2ea-4376-96d7-2f59d03f289c,space,Seminario C,65e04075-f759-48be-a68d-a4564b36fe3c,1.0,,20,classroom,0,,,0.0,0.0,,,,,,,,,
+d5b91416-4cb2-4a6c-8e47-7e10766f1fa5,space,QC/2125 - Laboratori Kleinrock,65e04075-f759-48be-a68d-a4564b36fe3c,1.0,,30,lab,0,,,0.0,0.0,,,,,,,,,
 9e92c2d5-915d-4761-a082-6f1d15cd9991,career,Enginyeria Química,6ed72aab-42fb-4687-98d0-3ac798ee13b5,1.0,0,,,,,,,,60,,,,,,,,
 868466b3-8e14-45de-aa8e-00c99edc3563,course,1º,9e92c2d5-915d-4761-a082-6f1d15cd9991,1.0,1,,,,,,,,,,,,,,,9e92c2d5-915d-4761-a082-6f1d15cd9991,
 ce824aa8-d374-4923-91b2-1653d1569566,course,2º,9e92c2d5-915d-4761-a082-6f1d15cd9991,1.0,1,,,,,,,,,,,,,,,9e92c2d5-915d-4761-a082-6f1d15cd9991,
@@ -97,3 +98,44 @@ ce824aa8-d374-4923-91b2-1653d1569566,course,2º,9e92c2d5-915d-4761-a082-6f1d15cd
 cb7459e9-6831-4f8e-abf5-5c9cd211687b,coursegroup,212,ce824aa8-d374-4923-91b2-1653d1569566,1.0,1,,,,,,,,,,,,,,,,ce824aa8-d374-4923-91b2-1653d1569566
 88fba02a-ee42-4293-b42b-14c359d1772a,course,3º,9e92c2d5-915d-4761-a082-6f1d15cd9991,1.0,1,,,,,,,,,,,,,,,9e92c2d5-915d-4761-a082-6f1d15cd9991,
 f3bfa5a3-e19a-4745-932e-4a793e8e8cdb,course,4º,9e92c2d5-915d-4761-a082-6f1d15cd9991,1.0,1,,,,,,,,,,,,,,,9e92c2d5-915d-4761-a082-6f1d15cd9991,
+4827074d-b3b3-4554-9fec-0ac0274db127,career,Telecos,6ed72aab-42fb-4687-98d0-3ac798ee13b5,1.0,0,,,,,,,,60,,,,,,,,
+54e9a872-1839-42d6-a761-62ab949a3deb,course,1º,4827074d-b3b3-4554-9fec-0ac0274db127,1.0,0,,,,,,,,,,,,,,,4827074d-b3b3-4554-9fec-0ac0274db127,
+13701d7f-063d-4792-8f5c-91b33fbb463e,coursegroup,311,54e9a872-1839-42d6-a761-62ab949a3deb,1.0,1,,,,,,,,,,,,,,,,54e9a872-1839-42d6-a761-62ab949a3deb
+07067083-98f6-4e4a-b1b1-8c65e73b52ab,coursegroup,312,54e9a872-1839-42d6-a761-62ab949a3deb,1.0,1,,,,,,,,,,,,,,,,54e9a872-1839-42d6-a761-62ab949a3deb
+c1745d73-bd50-4862-80d1-808fba69e841,coursegroup,331,54e9a872-1839-42d6-a761-62ab949a3deb,1.0,1,,,,,,,,,,,,,,,,54e9a872-1839-42d6-a761-62ab949a3deb
+e15d0fbc-b266-4ebb-8d24-48423f15c016,coursegroup,332,54e9a872-1839-42d6-a761-62ab949a3deb,1.0,1,,,,,,,,,,,,,,,,54e9a872-1839-42d6-a761-62ab949a3deb
+5049f1ca-7f8f-48c8-8d7a-4a190abfd7a2,course,2º,4827074d-b3b3-4554-9fec-0ac0274db127,1.0,0,,,,,,,,,,,,,,,4827074d-b3b3-4554-9fec-0ac0274db127,
+2924044e-7fd1-4cb8-bc5c-d1ff32d162f5,coursegroup,311,5049f1ca-7f8f-48c8-8d7a-4a190abfd7a2,1.0,1,,,,,,,,,,,,,,,,5049f1ca-7f8f-48c8-8d7a-4a190abfd7a2
+4021a5e8-2ecb-4c9c-9d2b-2a25f0d2b7aa,coursegroup,312,5049f1ca-7f8f-48c8-8d7a-4a190abfd7a2,1.0,1,,,,,,,,,,,,,,,,5049f1ca-7f8f-48c8-8d7a-4a190abfd7a2
+85832ab4-6f09-4fe9-8eec-80ebee18a573,coursegroup,313,5049f1ca-7f8f-48c8-8d7a-4a190abfd7a2,1.0,1,,,,,,,,,,,,,,,,5049f1ca-7f8f-48c8-8d7a-4a190abfd7a2
+788a667c-2a02-4fd0-b757-d9d575724cfb,coursegroup,321,5049f1ca-7f8f-48c8-8d7a-4a190abfd7a2,1.0,1,,,,,,,,,,,,,,,,5049f1ca-7f8f-48c8-8d7a-4a190abfd7a2
+96744b50-bfbd-4e14-9d4c-ef7f6b923cc6,coursegroup,322,5049f1ca-7f8f-48c8-8d7a-4a190abfd7a2,1.0,1,,,,,,,,,,,,,,,,5049f1ca-7f8f-48c8-8d7a-4a190abfd7a2
+170ed208-4775-48ed-abfe-81fcf15218fc,course,3º,4827074d-b3b3-4554-9fec-0ac0274db127,1.0,0,,,,,,,,,,,,,,,4827074d-b3b3-4554-9fec-0ac0274db127,
+78d0ca66-2e40-4456-bfde-117b9e385ce6,coursegroup,310,170ed208-4775-48ed-abfe-81fcf15218fc,1.0,1,,,,,,,,,,,,,,,,170ed208-4775-48ed-abfe-81fcf15218fc
+93efc623-73a8-4c14-83e1-5ea6f77ae3af,coursegroup,330,170ed208-4775-48ed-abfe-81fcf15218fc,1.0,1,,,,,,,,,,,,,,,,170ed208-4775-48ed-abfe-81fcf15218fc
+6124c884-ef32-4210-b2c9-d873c73aac4c,course,4º,4827074d-b3b3-4554-9fec-0ac0274db127,1.0,1,,,,,,,,,,,,,,,4827074d-b3b3-4554-9fec-0ac0274db127,
+78350b90-baff-44ef-8c68-29f0cda9a5ed,career,Informàtica,6ed72aab-42fb-4687-98d0-3ac798ee13b5,1.0,0,,,,,,,,60,,,,,,,,
+3d433172-052f-4f6b-af61-27e2ba1a2bf3,course,1º,78350b90-baff-44ef-8c68-29f0cda9a5ed,1.0,1,,,,,,,,,,,,,,,78350b90-baff-44ef-8c68-29f0cda9a5ed,
+4e45026c-9229-4fc5-b85d-cdb199fb372d,coursegroup,41,3d433172-052f-4f6b-af61-27e2ba1a2bf3,1.0,1,,,,,,,,,,,,,,,,3d433172-052f-4f6b-af61-27e2ba1a2bf3
+24fc0f3f-5590-4972-aefc-140ac3d5ff75,coursegroup,43,3d433172-052f-4f6b-af61-27e2ba1a2bf3,1.0,1,,,,,,,,,,,,,,,,3d433172-052f-4f6b-af61-27e2ba1a2bf3
+44d2d02a-d41d-4dc6-98fb-b3641156346e,coursegroup,45,3d433172-052f-4f6b-af61-27e2ba1a2bf3,1.0,1,,,,,,,,,,,,,,,,3d433172-052f-4f6b-af61-27e2ba1a2bf3
+70e9f994-b844-4933-8bb8-014d81bf9dee,course,2º,78350b90-baff-44ef-8c68-29f0cda9a5ed,1.0,1,,,,,,,,,,,,,,,78350b90-baff-44ef-8c68-29f0cda9a5ed,
+56b1abc8-6f50-4251-ab21-080982799654,coursegroup,41,70e9f994-b844-4933-8bb8-014d81bf9dee,1.0,1,,,,,,,,,,,,,,,,70e9f994-b844-4933-8bb8-014d81bf9dee
+a32161a2-73da-46f2-bcfe-7a514a97dfab,coursegroup,43,70e9f994-b844-4933-8bb8-014d81bf9dee,1.0,1,,,,,,,,,,,,,,,,70e9f994-b844-4933-8bb8-014d81bf9dee
+60f655ec-d369-4c4b-94e6-19c3912a7205,coursegroup,45,70e9f994-b844-4933-8bb8-014d81bf9dee,1.0,1,,,,,,,,,,,,,,,,70e9f994-b844-4933-8bb8-014d81bf9dee
+f4d288b3-be76-4cc7-bdd7-005d037fd5be,course,3º,78350b90-baff-44ef-8c68-29f0cda9a5ed,1.0,1,,,,,,,,,,,,,,,78350b90-baff-44ef-8c68-29f0cda9a5ed,
+5f219220-b5f8-4a61-87d0-1156e8d8604b,coursegroup,41,f4d288b3-be76-4cc7-bdd7-005d037fd5be,1.0,1,,,,,,,,,,,,,,,,f4d288b3-be76-4cc7-bdd7-005d037fd5be
+e6cba43c-7c51-4697-b90a-7d6e964d9bf7,coursegroup,43,f4d288b3-be76-4cc7-bdd7-005d037fd5be,1.0,1,,,,,,,,,,,,,,,,f4d288b3-be76-4cc7-bdd7-005d037fd5be
+6ecc6775-b8f7-441c-97da-b0223d5524f9,coursegroup,44,f4d288b3-be76-4cc7-bdd7-005d037fd5be,1.0,1,,,,,,,,,,,,,,,,f4d288b3-be76-4cc7-bdd7-005d037fd5be
+49543b97-c418-44ba-a74e-7680e9c5e6e2,coursegroup,45,f4d288b3-be76-4cc7-bdd7-005d037fd5be,1.0,1,,,,,,,,,,,,,,,,f4d288b3-be76-4cc7-bdd7-005d037fd5be
+86137ea5-e5bc-469c-b654-de17e960fe1a,career,GCIS,6ed72aab-42fb-4687-98d0-3ac798ee13b5,1.0,0,,,,,,,,60,,,,,,,,
+2f2e0669-da84-4329-8758-59f21632b056,course,1º,86137ea5-e5bc-469c-b654-de17e960fe1a,1.0,1,,,,,,,,,,,,,,,86137ea5-e5bc-469c-b654-de17e960fe1a,
+a5e80103-e1dc-4d91-a446-dfbf623510a3,course,2º,86137ea5-e5bc-469c-b654-de17e960fe1a,1.0,1,,,,,,,,,,,,,,,86137ea5-e5bc-469c-b654-de17e960fe1a,
+6238656a-2ca5-4c68-b5ae-8050503cd2ac,course,3º,86137ea5-e5bc-469c-b654-de17e960fe1a,1.0,1,,,,,,,,,,,,,,,86137ea5-e5bc-469c-b654-de17e960fe1a,
+0ea1d9bb-db98-48b1-bd72-0a00e4f74669,career,IA,6ed72aab-42fb-4687-98d0-3ac798ee13b5,1.0,1,,,,,,,,60,,,,,,,,
+97536193-21e7-4833-b9fc-a0c7ac4b7d55,course,1º,0ea1d9bb-db98-48b1-bd72-0a00e4f74669,1.0,1,,,,,,,,,,,,,,,0ea1d9bb-db98-48b1-bd72-0a00e4f74669,
+6aad778d-15f9-48fa-b8eb-9b82a687db20,course,2º,0ea1d9bb-db98-48b1-bd72-0a00e4f74669,1.0,1,,,,,,,,,,,,,,,0ea1d9bb-db98-48b1-bd72-0a00e4f74669,
+05df55e7-550d-4705-b703-ef80d6de4df8,course,3º,0ea1d9bb-db98-48b1-bd72-0a00e4f74669,1.0,1,,,,,,,,,,,,,,,0ea1d9bb-db98-48b1-bd72-0a00e4f74669,
+0fbfc420-5229-47b7-8dfd-4d9289890db9,coursegroup,711,05df55e7-550d-4705-b703-ef80d6de4df8,1.0,1,,,,,,,,,,,,,,,,05df55e7-550d-4705-b703-ef80d6de4df8
+d1195b2d-2585-476e-b988-756373cd65e9,coursegroup,712,05df55e7-550d-4705-b703-ef80d6de4df8,1.0,1,,,,,,,,,,,,,,,,05df55e7-550d-4705-b703-ef80d6de4df8
+84751523-749b-4b8d-8843-eb2f006308dd,course,4º,0ea1d9bb-db98-48b1-bd72-0a00e4f74669,1.0,1,,,,,,,,,,,,,,,0ea1d9bb-db98-48b1-bd72-0a00e4f74669,
